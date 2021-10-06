@@ -15,7 +15,7 @@ def Gauges_data_Spartek(source_file, row=10):
     :returns: None
     :rtype: None """
 
-    df = pd.read_csv(source_file, sep='[\s+,\t]', header=None, skiprows=row ,
+    df = pd.read_csv(source_file, sep='\s+', header=None, skiprows=row ,
                      names=['date', 'time','AMPM','elpse', 'pressure',
                             'temperature'], engine='python')
     range_data = df.index.tolist()
