@@ -4,7 +4,7 @@ from helper import Gauges_data, MPFM_data, Gauges_data_Spartek
 from PIL import Image
 
 def main():
-    st.set_page_config(page_title='ASCII files Upload Page', layout='wide')
+    st.set_page_config(page_title='MPFM and Gauges', layout='wide')
     st.title('Roxar MPFM unit and Downhole Memory gauges log file grapher')
     values = ['Choose Data','MPFM Upload', 'Metrolog Gauges Upload','Spartek Gauges Upload']
     default_ix = values.index('Choose Data')
