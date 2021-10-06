@@ -91,11 +91,15 @@ def MPFM_data(source_file):
     df.dropna(inplace=True, axis=1)
     # Masking
     range_data = df.index.tolist()
+    header_list = df.columns.tolist()
     range_data_selection = st.slider('Range:', min_value=min(range_data),
                                      max_value=max(range_data),
                                      value=(min(range_data), max(range_data)))
     # Creating the masked df from the index
+    df_header = st.multiselect('header', header_list,default=header_list)
+    df_header_mask = df.columns.isin([df_header])
     df_lst = df[range_data_selection[0]:range_data_selection[1]]
+    df_lst2 = df_lst[df_header]
 
     # Averages calculation
     avg_P           = np.average(df_lst['Pressure'])
@@ -131,10 +135,10 @@ def MPFM_data(source_file):
     oil_water_cum = graphing_line_2v(df_lst, 'Clock', 'Std.AccumOilVol', 'AccumWaterVol')
 
     # Drawing the graphs
-    st.markdown(f'*Available Data: {df_lst.shape[0]}')
+    st.markdown(f'*Available Data: {df_lst2.shape[0]}')
     with st.expander(label='Data Set'):
-        st.dataframe(df_lst)
-        st.download_button(label='Download data', data=df_lst.to_csv(), mime='text/csv')
+        st.dataframe(df_lst2)
+        st.download_button(label='Download data', data=df_lst2.to_csv(), mime='text/csv')
     st.markdown('Average Table')
     st.dataframe(summary)
     st.download_button(label='Download Summary', data=summary.to_csv(), mime='text/csv')
