@@ -32,8 +32,10 @@ def Gauges_data_Spartek(source_file, row=10):
     st.markdown('Pressure Temperature Graph')
 
     with st.expander(label='Table of Data'):
-        st.markdown('Full Data Table')
-        st.dataframe(df_lst)
+        NN = st.selectbox('Interval', [1, 2, 5, 10, 15, 20, 30, 50])
+        st.dataframe(df_lst.loc[::int(NN)])
+        st.markdown(f'*Available Data: {df_lst.loc[::int(NN)].shape[0]}')
+        st.download_button(label='Download data', data=df_lst.loc[::int(NN)].to_csv(), mime='text/csv')
     with st.expander(label='Gauges Chart'):
         st.plotly_chart(dx)
     st.markdown(f'*Available Data: {df_lst.shape[0]}')
@@ -68,8 +70,11 @@ def Gauges_data(source_file, row=10):
     st.markdown('Pressure Temperature Graph')
 
     with st.expander(label='Table of Data'):
-        st.markdown('Full Data Table')
-        st.dataframe(df_lst)
+        NN = st.selectbox('Interval', [1, 2, 5, 10, 15, 20, 30, 50])
+        st.dataframe(df_lst.loc[::int(NN)])
+        st.markdown(f'*Available Data: {df_lst.loc[::int(NN)].shape[0]}')
+        st.download_button(label='Download data', data=df_lst.loc[::int(NN)].to_csv(), mime='text/csv')
+        # st.dataframe(df_lst)
     with st.expander(label='Gauges Chart'):
         st.plotly_chart(dx)
     st.markdown(f'*Available Data: {df_lst.shape[0]}')
@@ -96,8 +101,7 @@ def MPFM_data(source_file):
                                      max_value=max(range_data),
                                      value=(min(range_data), max(range_data)))
     # Creating the masked df from the index
-    df_header = st.multiselect('Data Columns', header_list,default=header_list)
-    # df_header_mask = df.columns.isin([df_header])
+    df_header = st.multiselect('Data Columns', header_list, default=header_list)
     df_lst = df[range_data_selection[0]:range_data_selection[1]]
     df_lst2 = df_lst[df_header]
 
@@ -131,7 +135,6 @@ def MPFM_data(source_file):
     # Making the graphs
     ptd           = graphing_line_2v(df_lst, 'Clock', 'Pressure', 'dP')
     oil_GOR       = graphing_line_2v(df_lst, 'Clock', 'Std.OilFlowrate', 'GOR(std)')
-    gas_oil       = graphing_line_2v(df_lst, 'Clock', 'Std.OilFlowrate', 'Std.GasFlowrate')
 
     # Drawing the graphs
     st.markdown(f'*Available Data: {df_lst2.shape[0]}')
@@ -139,7 +142,7 @@ def MPFM_data(source_file):
         NN = st.selectbox('Interval', [1, 2, 5, 10, 15, 20, 30, 50])
         st.dataframe(df_lst2.loc[::int(NN)])
         st.markdown(f'*Available Data: {df_lst2.loc[::int(NN)].shape[0]}')
-        st.download_button(label='Download data', data=df_lst2.to_csv(), mime='text/csv')
+        st.download_button(label='Download data', data=df_lst2.loc[::int(NN)].to_csv(), mime='text/csv')
     st.markdown('Average Table')
     st.dataframe(summary)
     # st.table(summary)
@@ -158,18 +161,18 @@ def MPFM_data(source_file):
         col6.plotly_chart(ptd)
         col7.plotly_chart(oil_GOR)
     with st.expander(label='Custom Graph'):
-        SS = st.multiselect('Select up to 4 Headers',header_list[2:])
-        if len(SS)==0:
+        SS = st.multiselect('Select up to 4 Headers', header_list[2:])
+        if len(SS) == 0:
             st.write('Select a column from the list ☝🏼')
             graph1 = None
-        elif len(SS)==1:
-            graph1 = graphing_line_1v(df_lst, 'Clock',SS[0])
-        elif len(SS)==2:
-            graph1 = graphing_line_2v(df_lst, 'Clock',SS[0],SS[1])
-        elif len(SS)==3:
-            graph1 = graphing_line_3v(df_lst, 'Clock',SS[0],SS[1],SS[2])
-        elif len(SS)==4:
-            graph1 = graphing_line_4v(df_lst, 'Clock',SS[0],SS[1],SS[2],SS[3])
+        elif len(SS) == 1:
+            graph1 = graphing_line_1v(df_lst, 'Clock', SS[0])
+        elif len(SS) == 2:
+            graph1 = graphing_line_2v(df_lst, 'Clock', SS[0], SS[1])
+        elif len(SS) == 3:
+            graph1 = graphing_line_3v(df_lst, 'Clock', SS[0], SS[1], SS[2])
+        elif len(SS) == 4:
+            graph1 = graphing_line_4v(df_lst, 'Clock', SS[0], SS[1], SS[2], SS[3])
         else:
             st.write('Too Many values 😅')
             graph1 = None
