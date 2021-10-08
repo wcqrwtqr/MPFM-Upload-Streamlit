@@ -1,4 +1,5 @@
 import plotly.express as px
+import streamlit as st
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
@@ -17,7 +18,7 @@ def graphing_line_2v (df, x, ym, ys):
     :returns: graph object
     :rtype: figure """
 
-    xt =  df[x]
+    xt = df[x]
     yp = df[ym]
     yt = df[ys]
     # Making the graph for the two values
@@ -44,7 +45,7 @@ def graphing_line_1v (df, x, y):
     :returns: graph object
     :rtype: figure """
 
-    xt =  df[x]
+    xt = df[x]
     yp = df[y]
     # Making the graph for the two values
     fig_n = make_subplots(specs=[[{'secondary_y': True}]])
@@ -79,9 +80,9 @@ def graphing_line_3v (df, x, ym, ys, yu):
     :returns: graph object
     :rtype: figure """
 
-    xt =  df[x]
-    yp = df[ym]
-    yt = df[ys]
+    xt  = df[x]
+    yp  = df[ym]
+    yt  = df[ys]
     ytt = df[yu]
     # Making the graph for the two values
     fig_n = make_subplots(specs=[[{'secondary_y': True}]])
@@ -113,10 +114,10 @@ def graphing_line_4v (df, x, ym, ys, yu, yg):
     :returns: graph object
     :rtype: figure """
 
-    xt =  df[x]
-    yp = df[ym]
-    yt = df[ys]
-    ytt = df[yu]
+    xt   = df[x]
+    yp   = df[ym]
+    yt   = df[ys]
+    ytt  = df[yu]
     yttt = df[yg]
     # Making the graph for the two values
     fig_n = make_subplots(specs=[[{'secondary_y': True}]])
@@ -155,4 +156,25 @@ def graphing_line_4v (df, x, ym, ys, yu, yg):
 #         fig_n.add_trace(go.Scatter(x=xt, y=df[elem], mode='lines', name=elem), secondary_y=False)
 
 #     return fig_n
+
+def apply_Graphs(selection, df, header_list):
+        if len(selection) == 0:
+            st.subheader('Select a column from the list ☝🏼')
+            graph1 = None
+        elif len(selection) == 1:
+            graph1 = graphing_line_1v(df, 'Clock', selection[0])
+        elif len(selection) == 2:
+            graph1 = graphing_line_2v(df, 'Clock', selection[0], selection[1])
+        elif len(selection) == 3:
+            graph1 = graphing_line_3v(df, 'Clock', selection[0], selection[1], selection[2])
+        elif len(selection) == 4:
+            graph1 = graphing_line_4v(df, 'Clock', selection[0], selection[1], selection[2], selection[3])
+        else:
+            st.subheader('Too Many values 😅')
+            graph1 = None
+
+        if graph1 is not None:
+            st.plotly_chart(graph1)
+        else:
+            pass
 

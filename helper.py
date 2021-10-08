@@ -1,7 +1,9 @@
 import pandas as pd
 import streamlit as st
 import numpy as np
-from graphing import graphing_line_2v, graphing_line_1v, graphing_line_3v, graphing_line_4v
+from graphing import graphing_line_2v, graphing_line_1v, graphing_line_3v, graphing_line_4v, apply_Graphs
+
+
 
 
 def Gauges_data_Spartek(source_file, row=10):
@@ -101,8 +103,10 @@ def MPFM_data(source_file):
                                      max_value=max(range_data),
                                      value=(min(range_data), max(range_data)))
     # Creating the masked df from the index
-    df_header = st.multiselect('Data Columns', header_list, default=header_list)
+    # df_header = st.multiselect('Data Columns', header_list, default=header_list)
+    df_header = st.sidebar.multiselect('Data Columns', header_list, default=header_list)
     df_lst = df[range_data_selection[0]:range_data_selection[1]]
+    # used a another dataframe df_lst2 instead of using the same df_lst so the graph are not affected when using the multi select (df_header) which will affect the rest of the graphs
     df_lst2 = df_lst[df_header]
 
     # Averages calculation
@@ -136,52 +140,37 @@ def MPFM_data(source_file):
     ptd           = graphing_line_2v(df_lst, 'Clock', 'Pressure', 'dP')
     oil_GOR       = graphing_line_2v(df_lst, 'Clock', 'Std.OilFlowrate', 'GOR(std)')
 
-    # Drawing the graphs
     st.markdown(f'*Available Data: {df_lst2.shape[0]}')
-    with st.expander(label='Data Set'):
-        NN = st.selectbox('Interval', [1, 2, 5, 10, 15, 20, 30, 50])
-        st.dataframe(df_lst2.loc[::int(NN)])
-        st.markdown(f'*Available Data: {df_lst2.loc[::int(NN)].shape[0]}')
-        st.download_button(label='Download data', data=df_lst2.loc[::int(NN)].to_csv(), mime='text/csv')
-    st.markdown('Average Table')
-    st.dataframe(summary)
-    # st.table(summary)
-    st.download_button(label='Download Summary', data=summary.to_csv(), mime='text/csv')
-    st.subheader('Summary of Data:')
-    col1, col2, col3, col4 = st.columns(4)
-    col1.subheader(f'Oil rate: {int(avg_oilRate)}')
-    col2.subheader(f'Water rate: {int(avg_waterRate)}')
     gas_rate_float = "{:.4f}".format(avg_std_gasRate)
-    col3.subheader(f'Gas rate: {float(gas_rate_float)}')
-    col4.subheader(f'GOR: {int(avg_GOR)}')
-
+    # st.subheader(f'Data Summary : Oil rate _{int(avg_oilRate)}_ / __Gas rate__ _{gas_rate_float}_ / GOR _{int(avg_GOR)}_')
+    st.markdown(f'Data Summary : Oil rate __*{int(avg_oilRate)}*__ / Gas rate __{gas_rate_float}__ / GOR __{int(avg_GOR)}__')
+    # st.write('---')
     # Making the graphs
     with st.expander(label='Parameters Charts'):
         col6, col7 = st.columns(2)
         col6.plotly_chart(ptd)
         col7.plotly_chart(oil_GOR)
+
+
+    # Drawing the graphs
+    with st.expander(label='Data Set'):
+        NN = st.selectbox('Interval', [1, 5, 10, 15, 20, 30, 60, 120])
+        st.dataframe(df_lst2.loc[::int(NN)])
+        st.markdown(f'*Available Data: {df_lst2.loc[::int(NN)].shape[0]}')
+        st.download_button(label='Download data', data=df_lst2.loc[::int(NN)].to_csv(), mime='text/csv')
+    with st.expander(label='Summary table'):
+        st.markdown('Average Table')
+        st.dataframe(summary)
+        st.download_button(label='Download Summary', data=summary.to_csv(), mime='text/csv')
+    # st.write('---')
+
     with st.expander(label='Custom Graph'):
         SS = st.multiselect('Select up to 4 Headers', header_list[2:])
-        if len(SS) == 0:
-            st.write('Select a column from the list ☝🏼')
-            graph1 = None
-        elif len(SS) == 1:
-            graph1 = graphing_line_1v(df_lst, 'Clock', SS[0])
-        elif len(SS) == 2:
-            graph1 = graphing_line_2v(df_lst, 'Clock', SS[0], SS[1])
-        elif len(SS) == 3:
-            graph1 = graphing_line_3v(df_lst, 'Clock', SS[0], SS[1], SS[2])
-        elif len(SS) == 4:
-            graph1 = graphing_line_4v(df_lst, 'Clock', SS[0], SS[1], SS[2], SS[3])
-        else:
-            st.write('Too Many values 😅')
-            graph1 = None
+        apply_Graphs(SS,df_lst,header_list)
 
-        if graph1 is not None:
-            st.plotly_chart(graph1)
-        else:
-            pass
-
+    with st.expander(label='Custom Graph 2'):
+        com = st.multiselect('Select headers',header_list[2:])
+        apply_Graphs(com,df_lst,header_list)
 
 
 
