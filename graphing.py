@@ -56,13 +56,6 @@ def graphing_line_1v (df, x, y):
     return fig_n
 
 
-
-# bar_chart = px.bar(pivot_count_df, x='Profit', y='Sale', text='Sale',
-#                    color_discrete_sequence=['#F63366']*len(pivot_df),
-#                    template='plotly_white')
-# st.plotly_chart(bar_chart)
-
-
 def graphing_line_3v (df, x, ym, ys, yu):
     """ Graphing function for two axis
 
@@ -134,47 +127,31 @@ def graphing_line_4v (df, x, ym, ys, yu, yg):
     return fig_n
 
 
-### DID NOT WORK +++++TODO
+def apply_Graphs_v2(selection, df, header_list, tcol, st=st):
+    '''
+    This function makes the selection of the different graphs values possible
+    up to 4 parameters
+    '''
+    if len(selection) == 0:
+        st.subheader('Select a column from the list ☝🏼')
+        graph1 = None
+    elif len(selection) == 1:
+        graph1 = graphing_line_1v(df, tcol, selection[0])
+    elif len(selection) == 2:
+        graph1 = graphing_line_2v(df, tcol, selection[0], selection[1])
+    elif len(selection) == 3:
+        graph1 = graphing_line_3v(df, tcol, selection[0], selection[1], selection[2])
+    elif len(selection) == 4:
+        graph1 = graphing_line_4v(df, tcol, selection[0], selection[1], selection[2], selection[3])
+    else:
+        st.subheader('Too Many values 😅')
+        graph1 = None
 
-# def graphing_line_xv (df, x, *args):
-#     """ Graphing function for many axis
+    if graph1 is not None:
+        st.plotly_chart(graph1)
+    else:
+        pass
 
-#     :param df: Dataframe
-#     :type df: string
-#     :param x: Dataframe for axis x
-#     :type x: string
-#     :param ym: Dataframe for axis y primary
-#     :type ym: string
 
-#     :returns: graph object
-#     :rtype: figure """
 
-#     xt =  df[x]
-#     for elem in args:
-#         fig_n.update_xaxes(title_text=x)
-#         fig_n.update_yaxes(title_text=elem, secondary_y=False)
-#         fig_n.add_trace(go.Scatter(x=xt, y=df[elem], mode='lines', name=elem), secondary_y=False)
-
-#     return fig_n
-
-def apply_Graphs(selection, df, header_list):
-        if len(selection) == 0:
-            st.subheader('Select a column from the list ☝🏼')
-            graph1 = None
-        elif len(selection) == 1:
-            graph1 = graphing_line_1v(df, 'Clock', selection[0])
-        elif len(selection) == 2:
-            graph1 = graphing_line_2v(df, 'Clock', selection[0], selection[1])
-        elif len(selection) == 3:
-            graph1 = graphing_line_3v(df, 'Clock', selection[0], selection[1], selection[2])
-        elif len(selection) == 4:
-            graph1 = graphing_line_4v(df, 'Clock', selection[0], selection[1], selection[2], selection[3])
-        else:
-            st.subheader('Too Many values 😅')
-            graph1 = None
-
-        if graph1 is not None:
-            st.plotly_chart(graph1)
-        else:
-            pass
 

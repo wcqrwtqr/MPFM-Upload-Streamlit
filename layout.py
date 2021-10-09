@@ -1,14 +1,13 @@
 import streamlit as st
 import os
-from helper import Gauges_data, MPFM_data, Gauges_data_Spartek
+from helper import Gauges_data, MPFM_data, Gauges_data_Spartek, daq_data
 from PIL import Image
 from simulation import Loadingtruck, setup
 import simpy
 
 def main():
     st.set_page_config(page_title='MPFM and Gauges', layout='wide')
-    # st.title('MPFM and Downhole Memory gauges Row data viewer')
-    values         = ['Choose Data', 'MPFM Upload', 'Metrolog Gauges Upload', 'Spartek Gauges Upload', 'Loading Simulation']
+    values         = ['Choose Data', 'MPFM Upload', 'Metrolog Gauges Upload', 'Spartek Gauges Upload','DAQ Upload', 'Loading Simulation']
     default_ix     = values.index('Choose Data')
     window_ANTICOR = st.sidebar.selectbox('Selection Window', values, index = default_ix)
     package_dir    = os.path.dirname(os.path.abspath(__file__))
@@ -47,9 +46,6 @@ def main():
         try:
             Gauges_data_Spartek(source_data)
             col1, col2 = st.columns(2)
-            # image = Image.open(os.path.join(package_dir, 'Thumbnail/Gauges data thumbnail.jpg'))
-            # col1.image(image, caption='youtube', width=100)
-            # col2.markdown('See my youtube on this data: https://youtu.be/C6oz96OLCCg')
         except Exception:
             st.subheader('No Data available!!')
             st.write('Select correct data for Metrolog gauges')
@@ -67,9 +63,6 @@ def main():
         try:
             Gauges_data(source_data)
             col1, col2 = st.columns(2)
-            # image = Image.open(os.path.join(package_dir, 'Thumbnail/Gauges data thumbnail.jpg'))
-            # col1.image(image, caption='youtube', width=100)
-            # col2.markdown('See my youtube on this data: https://youtu.be/C6oz96OLCCg')
         except Exception:
             st.subheader('No Data available!!')
             st.write('Select correct data for Spartek gauges')
@@ -81,16 +74,31 @@ def main():
         st.write('---')
         st.markdown('''
                     The below is to view and the multiphase meter of type __ROXAR__ online \n
-                    The page can view the data, download the summary values to excel and graph the data using a custom graph up to 4 values
+                    The page can view the data, download the summary values to excel and
+                    graph the data using a custom graph up to 4 values.
                     ''')
         source_data = st.file_uploader(label='Uplaod MPFM data to web page', type=['csv', 'log', 'txt'])
         st.write('---')
         try:
             MPFM_data(source_data)
             col1, col2 = st.columns(2)
-            # image = Image.open(os.path.join(package_dir, 'Thumbnail/MPFM data thumbnail.jpg'))
-            # col1.image(image, caption='youtube', width=100)
-            # col2.markdown('See my youtube on this data:https://youtu.be/sctzeSaUL2c')
+        except Exception:
+            st.subheader('No data selected')
+            st.write('Select the correct data for the MPFM')
+
+
+# DAQ Upload
+    if window_ANTICOR == 'DAQ Upload':
+        st.title('DAQ Data 🔬')
+        st.write('---')
+        st.markdown('''
+                    The below is to view and the multiphase meter of type __ROXAR__ online \n
+                    The page can view the data, download the summary values to excel and graph the data using a custom graph up to 4 values
+                    ''')
+        source_data = st.file_uploader(label='Uplaod MPFM data to web page', type=['csv', 'log', 'txt'])
+        st.write('---')
+        try:
+            daq_data(source_data)
         except Exception:
             st.subheader('No data selected')
             st.write('Select the correct data for the MPFM')
@@ -110,10 +118,9 @@ def main():
             no_trucks     = int(col3.number_input('No of trucks', 1))
             duration      = int(col4.selectbox('Loading time in minutes', [720, 1440]))
             submit = st.form_submit_button(label='Submit')
-        # st.write('---')
-        env           = simpy.Environment()
+        env = simpy.Environment()
         env.process(setup(env, no_stations, loading_time, 10, no_trucks))
-        env.run(until = duration)
+        env.run(until=duration)
 
 
 if __name__ == '__main__':
