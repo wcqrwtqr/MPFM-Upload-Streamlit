@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 import numpy as np
-from graphing import graphing_line_2v, apply_Graphs_v2
+from graphing import graphing_line_arg
 
 
 def Gauges_data_Spartek(source_file, row=10):
@@ -26,8 +26,7 @@ def Gauges_data_Spartek(source_file, row=10):
                                      value=(min(range_data), max(range_data)))
     # Creating the masked df from the index
     df_lst = df[range_data_selection[0]:range_data_selection[1]]
-    # graphing the values of time, pressure and temperature using the function
-    dx = graphing_line_2v(df_lst, 'date_time', 'pressure', 'temperature')
+
     # Showing the graphs 
     st.markdown(f'*Available Data: {df_lst.shape[0]}')
     st.markdown('Pressure Temperature Graph')
@@ -38,13 +37,11 @@ def Gauges_data_Spartek(source_file, row=10):
         st.markdown(f'*Available Data: {df_lst.loc[::int(NN)].shape[0]}')
         st.download_button(label='Download data', data=df_lst.loc[::int(NN)].to_csv(), mime='text/csv')
     with st.expander(label='Gauges Chart'):
-        st.plotly_chart(dx)
-    st.markdown(f'*Available Data: {df_lst.shape[0]}')
+        graphing_line_arg(df_lst, 'date_time', st, ['pressure', 'temperature'])
 
 # ********************************************************************
 # *************** Gauges Function for Metrolg Gauges******************
 # ********************************************************************
-
 def Gauges_data(source_file, row=10):
     """ Gauges data processing generator
 
@@ -66,8 +63,6 @@ def Gauges_data(source_file, row=10):
                                      value=(min(range_data), max(range_data)))
     # Creating the masked df from the index
     df_lst = df[range_data_selection[0]:range_data_selection[1]]
-    # graphing the values of time, pressure and temperature using the function
-    dx = graphing_line_2v(df_lst, 'date_time', 'pressure', 'temperature')
     # Showing the graphs 
     st.markdown(f'*Available Data: {df_lst.shape[0]}')
     st.markdown('Pressure Temperature Graph')
@@ -80,8 +75,8 @@ def Gauges_data(source_file, row=10):
                            data=df_lst.loc[::int(NN)].to_csv(),
                            mime='text/csv')
     with st.expander(label='Gauges Chart'):
-        st.plotly_chart(dx)
-    st.markdown(f'*Available Data: {df_lst.shape[0]}')
+    # graphing the values of time, pressure and temperature using the function
+        graphing_line_arg(df_lst, 'date_time', st, ['pressure', 'temperature'])
 
 # ********************************************************************
 # ************** MPFM Function ***************************************
@@ -141,20 +136,14 @@ def MPFM_data(source_file):
                     }
     summary = pd.DataFrame([dict_summary])
 
-    # Making the graphs
-    ptd           = graphing_line_2v(df_lst, 'Clock', 'Pressure', 'dP')
-    oil_GOR       = graphing_line_2v(df_lst, 'Clock', 'Std.OilFlowrate', 'GOR(std)')
-
     st.markdown(f'*Available Data: {df_lst2.shape[0]}')
     gas_rate_float = "{:.4f}".format(avg_std_gasRate)
-    # st.subheader(f'Data Summary : Oil rate _{int(avg_oilRate)}_ / __Gas rate__ _{gas_rate_float}_ / GOR _{int(avg_GOR)}_')
     st.markdown(f'Data Summary : Oil rate __*{int(avg_oilRate)}*__ / Gas rate __{gas_rate_float}__ / GOR __{int(avg_GOR)}__')
-    # st.write('---')
     # Making the graphs
     with st.expander(label='Parameters Charts'):
         col6, col7 = st.columns(2)
-        col6.plotly_chart(ptd)
-        col7.plotly_chart(oil_GOR)
+        graphing_line_arg(df_lst, 'Clock', col6, ['Pressure', 'dP'])
+        graphing_line_arg(df_lst, 'Clock', col7, ['Std.OilFlowrate', 'GOR(std)'])
 
     # making the average table along with a graph
     with st.expander(label='Average table'):
@@ -165,12 +154,13 @@ def MPFM_data(source_file):
             col6.write('Average table 👇🏼')
             col7.write('Graph here 👇🏼')
         col6.dataframe(df_lst[avg_selection].mean())
-        apply_Graphs_v2(avg_selection, df_lst, header_list, 'Clock', st=col7)
+        graphing_line_arg(df_lst, 'Clock',col7, avg_selection)
         st.download_button('Download Average table', data=df_lst[avg_selection].mean().to_csv(), mime='text/csv')
 
     # Showing the data set with the needed columns 
     with st.expander(label='Data Set'):
-        NN = st.selectbox('Interval', [1, 5, 10, 15, 20, 30, 60, 120])
+        NN = st.selectbox('Interval', [1, 5, 10, 15, 20, 30])
+        st.write('👈🏼 Add/Remove from the sidebar list')
         st.dataframe(df_lst2.loc[::int(NN)])
         st.markdown(f'*Available Data: {df_lst2.loc[::int(NN)].shape[0]}')
         st.download_button(label='Download data', data=df_lst2.loc[::int(NN)].to_csv(), mime='text/csv')
@@ -181,12 +171,16 @@ def MPFM_data(source_file):
                            mime='text/csv')
 
     with st.expander(label='Custom Graph'):
-        SS = st.multiselect('Select up to 4 Headers', header_list[2:])
-        apply_Graphs_v2(SS, df_lst, header_list, 'Clock')
+        SS = st.multiselect('Select Headers', header_list[2:])
+        graphing_line_arg(df_lst, 'Clock',st, SS)
 
     with st.expander(label='Custom Graph 2'):
         com = st.multiselect('Select headers', header_list[2:])
-        apply_Graphs_v2(com, df_lst, header_list, 'Clock')
+        graphing_line_arg(df_lst, 'Clock',st, com)
+
+    with st.expander(label='Custom Graph 3'):
+        new = st.multiselect('Select one', header_list[2:])
+        graphing_line_arg(df_lst, 'Clock', st, new)
 
 
 # ********************************************************************
@@ -224,19 +218,20 @@ def daq_data(source_file):
     # making the average table along with a graph
     with st.expander(label='Average table'):
         # Select the columns that we need to see the average and graph for it
-        avg_selection = st.multiselect('select header', header_list[2:])
+        avg_selection = st.multiselect('select header', header_list[2:-1])
         col6, col7 = st.columns(2)
         if avg_selection != []:
             col6.write('Average table 👇🏼')
             col7.write('Graph here 👇🏼')
         col6.dataframe(df_lst[avg_selection].mean())
-        apply_Graphs_v2(avg_selection, df_lst, header_list, 'date_time', st=col7)
+        graphing_line_arg(df_lst, 'date_time', col7, avg_selection)
         st.download_button('Download Average table', data=df_lst[avg_selection].mean().to_csv(), mime='text/csv')
 
     # Showing the Data set and removing any unwanted columns
     with st.expander(label='Data Set'):
         # Select the interval that will reduce the number of rows
         NN = st.selectbox('Interval', [1, 5, 10, 15, 20, 30, 60, 120])
+        st.write('👈🏼 Add/Remove from the sidebar list')
         st.dataframe(df_lst2.loc[::int(NN)])
         st.markdown(f'*Available Data: {df_lst2.loc[::int(NN)].shape[0]}')
         st.download_button(label='Download data', data=df_lst2.loc[::int(NN)].to_csv(), mime='text/csv')
@@ -244,12 +239,12 @@ def daq_data(source_file):
     # Custom graph 1
     with st.expander(label='Custom Graph'):
         col4, col5 = st.columns(2)
-        SS = st.multiselect('Select up to 4 Headers', header_list[2:-2])
-        apply_Graphs_v2(SS, df_lst, header_list, 'date_time')
+        SS = st.multiselect('Select Headers', header_list[2:-2])
+        graphing_line_arg(df_lst, 'date_time', st, SS)
 
     # Custom graph 2
     with st.expander(label='Custom Graph 2'):
         com = st.multiselect('Select headers',header_list[2:])
-        apply_Graphs_v2(com,df_lst,header_list,'date_time')
+        graphing_line_arg(df_lst, 'date_time', st, com)
 
 

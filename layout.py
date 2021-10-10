@@ -5,42 +5,54 @@ from PIL import Image
 from simulation import Loadingtruck, setup
 import simpy
 
+
 def main():
     st.set_page_config(page_title='MPFM and Gauges', layout='wide')
-    values         = ['Choose Data', 'MPFM Upload', 'Metrolog Gauges Upload', 'Spartek Gauges Upload','DAQ Upload', 'Loading Simulation']
-    default_ix     = values.index('Choose Data')
+    values         = ['Main Page', 'MPFM Upload', 'Metrolog Gauges Upload',
+                      'Spartek Gauges Upload', 'DAQ Upload', 'Loading Simulation']
+    default_ix     = values.index('Main Page')
     window_ANTICOR = st.sidebar.selectbox('Selection Window', values, index = default_ix)
     package_dir    = os.path.dirname(os.path.abspath(__file__))
 
-    if window_ANTICOR == 'Choose Data':
+# ============================================================
+# ====================Start Up Page===========================
+# ============================================================
+    if window_ANTICOR == 'Main Page':
         st.title('MPFM, MEMORY GAUGES & Simulation')
-        st.title('👈🏼 Choose data from menu bar')
-        st.write('---')
-        image = Image.open(os.path.join(package_dir, 'Thumbnail/youtube.jpg'))
+        st.subheader('👈🏼 Select service from menu bar')
         st.subheader('About the web site:')
         st.markdown('''
-                    Upload row data (ASCII) from the MPFM ROXAR unit or from the Down hole memory gauges and get
+                    Upload row data from the MPFM ROXAR unit or from the Down hole memory gauges or csv files from the DAQ system and get
                     an instant graph and data set based on your requirements.\n
-                    The gauges used in our company are either Metrolog or Spartek and I made two sheets which can serve both conditions.\n
-                    Also a tab for simulating the loading of oil to trucks using loading stations which is a simple tool that 
-                    can be used to get the number of trucks by changing the variables such as:\n
+                    You can generate graphs and adjust it to the duration you desire and caluclate the average values of the selected fields
+                    then download it to csv.\n
+                    The gauges used in our company are either __Metrolog__ or __Spartek__ and I made two sheets which can serve both conditions.\n
+                    Also there is one page for simulating the loading of oil to trucks using loading stations which is a simple tool that 
+                    can be used to get the total number of trucks by changing the variables such as:\n
                     - Number of loading stations.
                     - Number of trucks provided at a given time.
                     - Filling time.
                     - etc.
                     ''')
         st.write('---')
-        st.write("You can find the data discussed in my youtube channel")
+        st.write("Feel free to follow me in my YouTube channel for more video on data processing")
+        image = Image.open(os.path.join(package_dir, 'Thumbnail/youtube.jpg'))
         st.image(image, caption='youtube channel')
 
+# ============================================================
+# ====================Spartek  Gauges=========================
+# ============================================================
 # Gauges Spartek
     if window_ANTICOR == 'Spartek Gauges Upload':
         st.title('Down Hole Gauges _Spartek_ 🌡')
-        st.write('---')
         st.markdown('''
                     The below is to manipulate __SPARTEK__ Down Hole Memory Gauges row data\n
                     The page can view the data, download the values after applying a reduction factor to excel
                     ''')
+        with st.expander(label='Upload row data guidelines'):
+            st.warning('Ensure the txt file belongs to Spartek gauges and has the format as below')
+            image = Image.open(os.path.join(package_dir, 'Thumbnail/spartek.jpg'))
+            st.image(image)
         source_data = st.file_uploader(label='Uplaod gauges data to web page', type=['csv', 'log', 'txt'])
         st.write('---')
         try:
@@ -50,10 +62,12 @@ def main():
             st.subheader('No Data available!!')
             st.write('Select correct data for Metrolog gauges')
 
+# ============================================================
+# ====================Metrolog Gauges=========================
+# ============================================================
 # Gauges Metrolg
     if window_ANTICOR == 'Metrolog Gauges Upload':
         st.title('Down Hole Gauges _Metrolog_ 🌡')
-        st.write('---')
         st.markdown('''
                     The below is to manipulate __METROLOG__ Down Hole Memory Gauges row data\n
                     The page can view the data, download the values after applying a reduction factor to excel
@@ -67,11 +81,9 @@ def main():
             st.subheader('No Data available!!')
             st.write('Select correct data for Spartek gauges')
 
-
 # MPFM Upload
     if window_ANTICOR == 'MPFM Upload':
         st.title('Multiphase Meter Data 🔬')
-        st.write('---')
         st.markdown('''
                     The below is to view and the multiphase meter of type __ROXAR__ online \n
                     The page can view the data, download the summary values to excel and
@@ -86,15 +98,21 @@ def main():
             st.subheader('No data selected')
             st.write('Select the correct data for the MPFM')
 
-
+# ============================================================
+# ==================DATA Acquisition System===================
+# ============================================================
 # DAQ Upload
     if window_ANTICOR == 'DAQ Upload':
-        st.title('DAQ Data 🔬')
-        st.write('---')
+        st.title('DAQ Data Acquisition System 💽')
         st.markdown('''
-                    The below is to view and the multiphase meter of type __ROXAR__ online \n
+                    The below page is to view the Data Acquisition system of type __FEKETE__ or __FIELD NOTE__ online \n
                     The page can view the data, download the summary values to excel and graph the data using a custom graph up to 4 values
                     ''')
+        with st.expander(label='Upload row data guidelines'):
+            st.warning('Ensure the csv file has only one header and date start with yyy-mm-dd format')
+            image = Image.open(os.path.join(package_dir, 'Thumbnail/DAQ data.jpg'))
+            st.image(image)
+
         source_data = st.file_uploader(label='Uplaod MPFM data to web page', type=['csv', 'log', 'txt'])
         st.write('---')
         try:
@@ -103,14 +121,23 @@ def main():
             st.subheader('No data selected')
             st.write('Select the correct data for the MPFM')
 
+# ============================================================
+# ===================Stimulation trucks=======================
+# ============================================================
 # Simulation of loading trucks
     if window_ANTICOR == 'Loading Simulation':
         st.title('Trucks Loading Simulation 🚚')
-        st.write('---')
         st.markdown('''
                     The below is to __simulate__ the number of trucks that can be loaded in a loading station \n
                     The input below is used to change the simulation variables and see the final results below
                     ''')
+        with st.expander(label='Usage guidelines'):
+            st.info('''Choose the number of __loading stations__, __time to fill__ each
+                    truck, __number of trucks__ provided at a certain time and the
+                    other parameters and see the number of trucks that can be
+                    filed in the given duration
+                    ''')
+
         with st.form(key='simulation_form'):
             col1, col2, col3, col4 = st.columns(4)
             no_stations   = int(col1.number_input('loading stations', 1))
