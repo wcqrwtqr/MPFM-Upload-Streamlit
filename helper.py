@@ -95,13 +95,15 @@ def MPFM_data(source_file):
     df.dropna(inplace=True, axis=1)
     # Masking
     range_data = df.index.tolist()
+    # Create a new column combining the date and time
+    df['date_time'] = df['Date'] + " " + df['Clock']
     header_list = df.columns.tolist()
     range_data_selection = st.slider('Range:', min_value=min(range_data),
                                      max_value=max(range_data),
                                      value=(min(range_data), max(range_data)))
     # Creating the masked df from the index
     df_header = st.sidebar.multiselect('Data Columns', header_list,
-                                       default=header_list)
+                                       default=header_list[:-12])
     df_lst = df[range_data_selection[0]:range_data_selection[1]]
     # used a another dataframe df_lst2 instead of using the same df_lst so the
     # graph are not affected when using the multi select (df_header) which will
@@ -123,8 +125,10 @@ def MPFM_data(source_file):
     avg_gasSG       = np.average(df_lst['GasDensity'])
     avg_liquid      = avg_oilRate + avg_waterRate
     API             = (141.5/(avg_oilSG/1000) - 131.5)
-    start           = df_lst['Clock'][range_data_selection[0]] + ' ' + df_lst['Date'][range_data_selection[0]]
-    end             = df_lst['Clock'][range_data_selection[1]-1] + ' ' + df_lst['Date'][range_data_selection[1]-1]
+    # start           = df_lst['Clock'][range_data_selection[0]] + ' ' + df_lst['Date'][range_data_selection[0]]
+    # end             = df_lst['Clock'][range_data_selection[1]-1] + ' ' + df_lst['Date'][range_data_selection[1]-1]
+    start           = df_lst['date_time'][range_data_selection[0]] + ' ' + df_lst['Date'][range_data_selection[0]]
+    end             = df_lst['date_time'][range_data_selection[1]-1] + ' ' + df_lst['Date'][range_data_selection[1]-1]
     # Making the dataframe
     dict_summary = {'Start Time': start,
                     'End Time': end, 'WHP': avg_P, 'WHT': avg_T,
@@ -142,19 +146,19 @@ def MPFM_data(source_file):
     # Making the graphs
     with st.expander(label='Parameters Charts'):
         col6, col7 = st.columns(2)
-        graphing_line_arg(df_lst, 'Clock', col6, ['Pressure', 'dP'])
-        graphing_line_arg(df_lst, 'Clock', col7, ['Std.OilFlowrate', 'GOR(std)'])
+        graphing_line_arg(df_lst, 'date_time', col6, ['Pressure', 'dP'])
+        graphing_line_arg(df_lst, 'date_time', col7, ['Std.OilFlowrate', 'GOR(std)'])
 
     # making the average table along with a graph
     with st.expander(label='Average table'):
         # Select the columns that we need to see the average and graph for it
-        avg_selection = st.multiselect('select header', header_list[2:])
+        avg_selection = st.multiselect('select header', header_list[2:-1])
         col6, col7 = st.columns(2)
         if avg_selection != []:
             col6.write('Average table 👇🏼')
             col7.write('Graph here 👇🏼')
         col6.dataframe(df_lst[avg_selection].mean())
-        graphing_line_arg(df_lst, 'Clock',col7, avg_selection)
+        graphing_line_arg(df_lst, 'date_time',col7, avg_selection)
         st.download_button('Download Average table', data=df_lst[avg_selection].mean().to_csv(), mime='text/csv')
 
     # Showing the data set with the needed columns 
@@ -171,16 +175,16 @@ def MPFM_data(source_file):
                            mime='text/csv')
 
     with st.expander(label='Custom Graph'):
-        SS = st.multiselect('Select Headers', header_list[2:])
-        graphing_line_arg(df_lst, 'Clock',st, SS)
+        SS = st.multiselect('Select Headers', header_list[2:-2])
+        graphing_line_arg(df_lst, 'date_time',st, SS)
 
     with st.expander(label='Custom Graph 2'):
-        com = st.multiselect('Select headers', header_list[2:])
-        graphing_line_arg(df_lst, 'Clock',st, com)
+        com = st.multiselect('Select headers', header_list[2:-2])
+        graphing_line_arg(df_lst, 'date_time',st, com)
 
     with st.expander(label='Custom Graph 3'):
-        new = st.multiselect('Select one', header_list[2:])
-        graphing_line_arg(df_lst, 'Clock', st, new)
+        new = st.multiselect('Select one', header_list[2:-2])
+        graphing_line_arg(df_lst, 'date_time', st, new)
 
 
 # ********************************************************************
