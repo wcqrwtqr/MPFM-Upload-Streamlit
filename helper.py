@@ -28,8 +28,9 @@ def Gauges_data_Spartek(source_file, row=10):
     df_lst = df[range_data_selection[0]:range_data_selection[1]]
 
     # Showing the graphs 
+    st.markdown(f'Max __Temperature__: {df_lst["temperature"].max()} - Max __Pressure__: {df_lst["pressure"].max()}')
     st.markdown(f'*Available Data: {df_lst.shape[0]}')
-    st.markdown('Pressure Temperature Graph')
+    # st.markdown('Pressure Temperature Graph')
 
     with st.expander(label='Table of Data'):
         NN = st.selectbox('Interval', [1, 2, 5, 10, 15, 20, 30, 50])
@@ -64,8 +65,8 @@ def Gauges_data(source_file, row=10):
     # Creating the masked df from the index
     df_lst = df[range_data_selection[0]:range_data_selection[1]]
     # Showing the graphs 
+    st.markdown(f'Max __Temperature__: {df_lst["temperature"].max()} - Max __Pressure__: {df_lst["pressure"].max()}')
     st.markdown(f'*Available Data: {df_lst.shape[0]}')
-    st.markdown('Pressure Temperature Graph')
 
     with st.expander(label='Table of Data'):
         NN = st.selectbox('Interval', [1, 2, 5, 10, 15, 20, 30, 50])
@@ -142,7 +143,8 @@ def MPFM_data(source_file):
 
     st.markdown(f'*Available Data: {df_lst2.shape[0]}')
     gas_rate_float = "{:.4f}".format(avg_std_gasRate)
-    st.markdown(f'Data Summary : Oil rate __*{int(avg_oilRate)}*__ / Gas rate __{gas_rate_float}__ / GOR __{int(avg_GOR)}__')
+    st.markdown(f'Data Average Values : Oil rate __*{int(avg_oilRate)}*__ / Gas rate __{gas_rate_float}__ / GOR __{int(avg_GOR)}__')
+    st.markdown(f'Data Max Values : Oil rate __{int(df_lst["Std.OilFlowrate"].max())}__ / Gas rate __{df_lst["Std.GasFlowrate"].max()}__ / GOR __{int(df_lst["GOR(std)"].max())}__')
     # Making the graphs
     with st.expander(label='Parameters Charts'):
         col6, col7 = st.columns(2)
