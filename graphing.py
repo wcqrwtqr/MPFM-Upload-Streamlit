@@ -4,6 +4,21 @@ import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
 def graphing_line_arg(df, x, st=st, *args):
+    """graphing_line_arg which accept a DataFrame and then can draw
+    as much y axes as much using the args option
+
+    Parameters
+    ----------
+    df : DataFrame
+        pandas Data Frame
+    x : DataFrame Series
+        choose the x axis from the data frame
+    st :
+        streamlit instance
+    args :
+        args of the y axes as much as you have
+    """
+
     for arg in args:
         fig_n = make_subplots(specs=[[{'secondary_y': True}]])
         my_string = ' , '.join(arg) + ' Graph'
