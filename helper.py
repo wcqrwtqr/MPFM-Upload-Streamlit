@@ -2,9 +2,29 @@ import pandas as pd
 import streamlit as st
 import numpy as np
 from graphing import graphing_line_arg
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 def Gauges_data_Spartek(source_file, row=10):
+    """Gauges_data_Spartek.
+
+    Parameters
+    ----------
+    source_file :
+        source_file
+    row :
+        row
+    """
+    """Gauges_data_Spartek.
+
+    Parameters
+    ----------
+    source_file :
+        source_file
+    row :
+        row
+    """
     """ Gauges data processing generator
 
     :param source_file: file path
@@ -76,7 +96,7 @@ def Gauges_data(source_file, row=10):
                            data=df_lst.loc[::int(NN)].to_csv(),
                            mime='text/csv')
     with st.expander(label='Gauges Chart'):
-    # graphing the values of time, pressure and temperature using the function
+        # graphing the values of time, pressure and temperature using the function
         graphing_line_arg(df_lst, 'date_time', st, ['pressure', 'temperature'])
 
 # ********************************************************************
@@ -155,12 +175,12 @@ def MPFM_data(source_file):
     with st.expander(label='Average table'):
         # Select the columns that we need to see the average and graph for it
         avg_selection = st.multiselect('select header', header_list[2:-1])
-        col6, col7 = st.columns(2)
+        col6, col8, col7 = st.columns(3)
         if avg_selection != []:
             col6.write('Average table 👇🏼')
             col7.write('Graph here 👇🏼')
         col6.dataframe(df_lst[avg_selection].mean())
-        graphing_line_arg(df_lst, 'date_time',col7, avg_selection)
+        graphing_line_arg(df_lst, 'date_time', col7, avg_selection)
         st.download_button('Download Average table', data=df_lst[avg_selection].mean().to_csv(), mime='text/csv')
 
     # Showing the data set with the needed columns 
@@ -178,15 +198,22 @@ def MPFM_data(source_file):
 
     with st.expander(label='Custom Graph'):
         SS = st.multiselect('Select Headers', header_list[2:-2])
-        graphing_line_arg(df_lst, 'date_time',st, SS)
+        graphing_line_arg(df_lst, 'date_time', st, SS)
 
     with st.expander(label='Custom Graph 2'):
         com = st.multiselect('Select headers', header_list[2:-2])
-        graphing_line_arg(df_lst, 'date_time',st, com)
+        graphing_line_arg(df_lst, 'date_time', st, com)
 
-    with st.expander(label='Custom Graph 3'):
-        new = st.multiselect('Select one', header_list[2:-2])
-        graphing_line_arg(df_lst, 'date_time', st, new)
+    with st.expander(label='Correlation'):
+        selector = st.multiselect('select one', header_list[2:-2])
+        cmp = st.selectbox('select one', ['coolwarm', 'BuPu','coolwarm_r','magma', 'magma_r', 'tab10'])
+        fig, ax = plt.subplots()
+        ax = sns.heatmap(df_lst[selector].corr(), cmap=cmp, annot=True)
+        st.pyplot(fig)
+        st.plotly_chart(fig)
+
+
+
 
 
 # ********************************************************************
