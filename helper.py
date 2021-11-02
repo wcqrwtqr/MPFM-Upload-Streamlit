@@ -2,8 +2,8 @@ import pandas as pd
 import streamlit as st
 import numpy as np
 from graphing import graphing_line_arg
-# import matplotlib.pyplot as plt
-# import seaborn as sns
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 def Gauges_data_Spartek(source_file, row=10):
@@ -204,13 +204,13 @@ def MPFM_data(source_file):
         com = st.multiselect('Select headers', header_list[2:-2])
         graphing_line_arg(df_lst, 'date_time', st, com)
 
-    # with st.expander(label='Correlation'):
-    #     selector = st.multiselect('select one', header_list[2:-2])
-    #     cmp = st.selectbox('select one', ['coolwarm', 'BuPu','coolwarm_r','magma', 'magma_r', 'tab10'])
-    #     fig, ax = plt.subplots()
-    #     ax = sns.heatmap(df_lst[selector].corr(), cmap=cmp, annot=True)
-    #     st.pyplot(fig)
-    #     st.plotly_chart(fig)
+    with st.expander(label='Correlation'):
+        selector = st.multiselect('select one', header_list[2:-2])
+        cmp = st.selectbox('select one', ['coolwarm', 'BuPu','coolwarm_r','magma', 'magma_r', 'tab10'])
+        fig, ax = plt.subplots()
+        ax = sns.heatmap(df_lst[selector].corr(), cmap=cmp, annot=True)
+        st.pyplot(fig)
+        st.plotly_chart(fig)
 
 
 
