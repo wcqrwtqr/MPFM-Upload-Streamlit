@@ -1,8 +1,22 @@
 #+TITL: MPFM-Upload-Streamlit
-Testing the new org mode
-Website to upload Roxar MPFM unit log file and generate graphs and summary report
 
-#+begin_src python
-# for test only
-import pandas as pd
-#+end_src
+* Streamlit data visualizer
+
+This site handles the data used for the operaiton in OILSERV with several type of equipment such as MPFM from ROXAR, metrolog and spartek down hole gauges as well was a page for simulating the number of trucks to load oil from well site based on the time of loading.
+
+The data can be uploaded to the website of Heruko and it will perform a number of tasks such as:
+
+1. Data visulazation
+2. Data averging and download to csv files
+3. create a corrleation plot (for MPFM only)
+4. Graph any axis from the data interactively
+
+Another added feature is to simulate the number of trucks needed to load oil from a well site or a loading station based on the time needed to fill a tanker vs the numner of loading stations avaialble.
+
+This project uses the follwoing libraries:
+
+ 1. Streamlit
+ 2. Pandas
+ 3. Numpy
+ 4. Plotly
+ 5. seaboarn
