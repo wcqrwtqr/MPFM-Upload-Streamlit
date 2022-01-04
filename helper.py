@@ -1,12 +1,11 @@
 import pandas as pd
 import streamlit as st
 import numpy as np
-from graphing import graphing_line_arg
 import matplotlib.pyplot as plt
 import seaborn as sns
+from graphing import graphing_line_arg
 
-
-def Gauges_data_Spartek(source_file, row=10):
+def Gauges_data_Spartek(source_file, row=20):
     """Gauges_data_Spartek.
 
     Parameters
@@ -25,16 +24,6 @@ def Gauges_data_Spartek(source_file, row=10):
     row :
         row
     """
-    """ Gauges data processing generator
-
-    :param source_file: file path
-    :type source_file: string
-    :param row: number of rows
-    :type row: int
-
-    :returns: None
-    :rtype: None """
-
     df = pd.read_csv(source_file, sep='\s+', header=None, skiprows=row,
                      names=['date', 'time', 'AMPM', 'elpse', 'pressure',
                             'temperature'],
@@ -63,7 +52,7 @@ def Gauges_data_Spartek(source_file, row=10):
 # ********************************************************************
 # *************** Gauges Function for Metrolg Gauges******************
 # ********************************************************************
-def Gauges_data(source_file, row=10):
+def Gauges_data(source_file, row=20):
     """ Gauges data processing generator
 
     :param source_file: file path
@@ -84,7 +73,7 @@ def Gauges_data(source_file, row=10):
                                      value=(min(range_data), max(range_data)))
     # Creating the masked df from the index
     df_lst = df[range_data_selection[0]:range_data_selection[1]]
-    # Showing the graphs 
+    # Showing the graphs
     st.markdown(f'Max __Temperature__: {df_lst["temperature"].max()} - Max __Pressure__: {df_lst["pressure"].max()}')
     st.markdown(f'*Available Data: {df_lst.shape[0]}')
 
@@ -212,10 +201,6 @@ def MPFM_data(source_file):
         st.pyplot(fig)
         st.plotly_chart(fig)
 
-
-
-
-
 # ********************************************************************
 # ************** DAQ Function ***************************************
 # ********************************************************************
@@ -231,7 +216,7 @@ def daq_data(source_file):
 
     df = pd.read_csv(source_file)
     df.dropna(inplace=True, axis=1)
-    df['date_time'] = df['Date']+ ' ' + df['Time']
+    df['date_time'] = df['Date'] + ' ' + df['Time']
     # Masking
     range_data = df.index.tolist()
     header_list = df.columns.tolist()
@@ -279,5 +264,4 @@ def daq_data(source_file):
     with st.expander(label='Custom Graph 2'):
         com = st.multiselect('Select headers',header_list[2:])
         graphing_line_arg(df_lst, 'date_time', st, com)
-
 
