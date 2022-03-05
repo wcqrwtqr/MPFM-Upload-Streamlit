@@ -9,7 +9,7 @@ import simpy
 def main():
     st.set_page_config(page_title='MPFM and Gauges', layout='wide')
     values         = ['Main Page', 'MPFM Upload', 'Metrolog Gauges Upload',
-                      'Spartek Gauges Upload', 'DAQ Upload', 'Loading Simulation']
+                      'Spartek Gauges Upload', 'DAQ Upload', 'Loading Simulation','File Name']
     default_ix     = values.index('Main Page')
     window_ANTICOR = st.sidebar.selectbox('Selection Window', values, index = default_ix)
     package_dir    = os.path.dirname(os.path.abspath(__file__))
@@ -149,6 +149,36 @@ def main():
         env.process(setup(env, no_stations, loading_time, 10, no_trucks))
         env.run(until=duration)
 
+
+    if window_ANTICOR == 'File Name':
+        st.title('Name files for operation')
+        st.markdown('''
+        This page is to get a new file name for the different docuements generatred
+        while doing operaiton in well testing such as Final report name convention,
+        Down hole gauges data, final report for SWT, DST, SLS etc.
+                    ''')
+
+        with st.form(key='file_form'):
+            col1, col2, col3, col4 = st.columns(4)
+            bu = col1.text_input(label='BU')
+            bl = col2.text_input(label='BL')
+            date_start = col3.date_input('Start date')
+            date_end = col4.date_input('End date')
+            client_name = col1.text_input(label='Clinet name')
+            well_name = col2.text_input(label='Well name')
+            job_id = col3.text_input(label='Job ID')
+            service_desc = col4.text_input(label='Service')
+            zone_desc = col1.text_input(label='Zone/DST')
+            submit = st.form_submit_button(label='Submit')
+
+            if submit:
+                st.subheader('With job ID')
+                st.write(f'Final Report Format with ID : **"{job_id} {client_name} {well_name} {zone_desc} final report from {date_start} to {date_end}"**')
+                st.write(f'Gauges Final Report Format : **"{job_id} {client_name} {well_name} {zone_desc} down hole gauges report from {date_start} to {date_end}"**')
+                st.write('---')
+                st.subheader('Without job ID')
+                st.write(f'Final Report Format : **"{client_name} {well_name} {zone_desc} final report from {date_start} to {date_end}"**')
+                st.write(f'Gauges Final Report Format : **"{client_name} {well_name} {zone_desc} down hole gauges report from {date_start} to {date_end}"**')
 
 if __name__ == '__main__':
     main()
