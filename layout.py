@@ -6,10 +6,46 @@ from simulation import Loadingtruck, setup
 import simpy
 
 
+def convert_api_and_oil_rate_to_ton(api, oil):
+    "This function will convert the data"
+    if api != 0.0:
+        x_api = 1000 * (141.5 / (api + 131.5))
+        x_ton = x_api * (oil / 6.29) / 1000
+    return x_ton
+
+
+def convert_air_suupply_to_ton(air):
+    "This function convert the air supply to ton"
+    x_ton = air * 60 * 24 / 35.3147 * 1.225 / 1000
+    return x_ton
+
+
+def calculate_the_values_of_air(API_val, air_rate, oil_rate):
+    # Check if the values are no zero
+    conv_oil = convert_api_and_oil_rate_to_ton(API_val, oil_rate)
+    conv_air = convert_air_suupply_to_ton(air_rate)
+
+    if conv_oil != 0:
+        air_oil_ratio = conv_air / conv_oil * 100
+        if 10 <= air_oil_ratio <= 20:
+            return (
+                # st.subheader('*This is within the correct value ✅*'),
+                st.subheader(f'At oil rate {oil_rate} and air rate of \
+                    {air_rate} ration is: {air_oil_ratio:.2f}% ✅')
+            )
+        else:
+            return (
+                # st.subheader('The value is out side the scope  🚫'),
+                st.subheader(f'At oil rate {oil_rate} and air rate of \
+                        {air_rate} ration is: {air_oil_ratio:.2f}% 🚫')
+            )
+
+
 def main():
+    "Main function of the page"
     st.set_page_config(page_title='MPFM and Gauges', layout='wide')
     values         = ['Main Page', 'MPFM Upload', 'Metrolog Gauges Upload',
-                      'Spartek Gauges Upload', 'DAQ Upload', 'Loading Simulation','File Name']
+                      'Spartek Gauges Upload', 'DAQ Upload', 'Loading Simulation','File Name','Air-Oil Ration']
     default_ix     = values.index('Main Page')
     window_ANTICOR = st.sidebar.selectbox('Selection Window', values, index = default_ix)
     package_dir    = os.path.dirname(os.path.abspath(__file__))
@@ -53,8 +89,8 @@ def main():
             st.warning('Ensure the txt file belongs to Spartek gauges and has the format as below')
             image = Image.open(os.path.join(package_dir, 'Thumbnail/spartek.jpg'))
             st.image(image)
-        source_data = st.file_uploader(label='Uplaod gauges data to web page', type=['csv', 'log', 'txt'])
-        st.write('---')
+            source_data = st.file_uploader(label='Uplaod gauges data to web page', type=['csv', 'log', 'txt'])
+            st.write('---')
         try:
             Gauges_data_Spartek(source_data)
             col1, col2 = st.columns(2)
@@ -145,9 +181,9 @@ def main():
             no_trucks     = int(col3.number_input('No of trucks', 1))
             duration      = int(col4.selectbox('Loading time in minutes', [720, 1440]))
             submit = st.form_submit_button(label='Submit')
-        env = simpy.Environment()
-        env.process(setup(env, no_stations, loading_time, 10, no_trucks))
-        env.run(until=duration)
+            env = simpy.Environment()
+            env.process(setup(env, no_stations, loading_time, 10, no_trucks))
+            env.run(until=duration)
 
 
     if window_ANTICOR == 'File Name':
@@ -179,6 +215,31 @@ def main():
                 st.subheader('Without job ID')
                 st.write(f'Final Report Format : **"{client_name} {well_name} {zone_desc} final report from {date_start} to {date_end}"**')
                 st.write(f'Gauges Final Report Format : **"{client_name} {well_name} {zone_desc} down hole gauges report from {date_start} to {date_end}"**')
+
+
+# added air compressor calculcaiton
+    if window_ANTICOR == 'Air-Oil Ration':
+        st.title('Air-oil Ratio Calcuation')
+        st.markdown('''
+        This page is didcated to calcualtion the percentage of the air to oil rate ratio
+
+        Ensure to get the rate between 10% and 20% to have a good burning
+        ''')
+
+        with st.form(key='file_form'):
+            col1, col2, col3 = st.columns(3)
+            API_val = col1.number_input(label='API', step=0.5)
+            oil_rate = col2.number_input(label='Oil Rate', step=100)
+            air_rate = col3.number_input(label='Air Rate', step=100)
+            submit = st.form_submit_button(label='Submit')
+
+            if submit:
+                lis = [100, 300, 500, 600, 700, 800, 900, 1000, 1200, 1500,
+                       1800, 2000, 2300, 2500, 2700, 3000]
+                for rate in range(len(lis)):
+                    new_air_rate = air_rate + lis[rate]
+                    calculate_the_values_of_air(API_val, new_air_rate, oil_rate)
+
 
 if __name__ == '__main__':
     main()
