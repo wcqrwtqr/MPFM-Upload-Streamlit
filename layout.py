@@ -4,60 +4,38 @@ from helper import Gauges_data, MPFM_data, Gauges_data_Spartek, daq_data
 from PIL import Image
 from simulation import Loadingtruck, setup
 import simpy
+from air_oil_ratio import calculate_the_values_of_air
+import plotly.express as px
+from bokeh.plotting import figure
 
-
-def convert_api_and_oil_rate_to_ton(api, oil):
-    "This function will convert the data"
-    if api != 0.0:
-        x_api = 1000 * (141.5 / (api + 131.5))
-        x_ton = x_api * (oil / 6.29) / 1000
-    return x_ton
-
-
-def convert_air_suupply_to_ton(air):
-    "This function convert the air supply to ton"
-    x_ton = air * 60 * 24 / 35.3147 * 1.225 / 1000
-    return x_ton
-
-
-def calculate_the_values_of_air(API_val, air_rate, oil_rate):
-    # Check if the values are no zero
-    conv_oil = convert_api_and_oil_rate_to_ton(API_val, oil_rate)
-    conv_air = convert_air_suupply_to_ton(air_rate)
-
-    if conv_oil != 0:
-        air_oil_ratio = conv_air / conv_oil * 100
-        if 10 <= air_oil_ratio <= 20:
-            return (
-                # st.subheader('*This is within the correct value ✅*'),
-                st.subheader(f'At oil rate {oil_rate} and air rate of \
-                    {air_rate} ration is: {air_oil_ratio:.2f}% ✅')
-            )
-        else:
-            return (
-                # st.subheader('The value is out side the scope  🚫'),
-                st.subheader(f'At oil rate {oil_rate} and air rate of \
-                        {air_rate} ration is: {air_oil_ratio:.2f}% 🚫')
-            )
 
 
 def main():
     "Main function of the page"
-    st.set_page_config(page_title='MPFM and Gauges', layout='wide')
-    values         = ['Main Page', 'MPFM Upload', 'Metrolog Gauges Upload',
-                      'Spartek Gauges Upload', 'DAQ Upload', 'Loading Simulation','File Name','Air-Oil Ration']
-    default_ix     = values.index('Main Page')
-    window_ANTICOR = st.sidebar.selectbox('Selection Window', values, index = default_ix)
-    package_dir    = os.path.dirname(os.path.abspath(__file__))
+    st.set_page_config(page_title="MPFM and Gauges", layout="wide")
+    values = [
+        "Main Page",
+        "MPFM Upload",
+        "Metrolog Gauges Upload",
+        "Spartek Gauges Upload",
+        "DAQ Upload",
+        "Loading Simulation",
+        # "File Name",
+        "Air-Oil Ration",
+    ]
+    default_ix = values.index("Main Page")
+    window_ANTICOR = st.sidebar.selectbox("Selection Window", values, index=default_ix)
+    package_dir = os.path.dirname(os.path.abspath(__file__))
 
-# ============================================================
-# ====================Start Up Page===========================
-# ============================================================
-    if window_ANTICOR == 'Main Page':
-        st.title('MPFM, MEMORY GAUGES & Simulation')
-        st.subheader('👈🏼 Select service from menu bar')
-        st.subheader('About the web site:')
-        st.markdown('''
+    # ============================================================
+    # ====================Start Up Page===========================
+    # ============================================================
+    if window_ANTICOR == "Main Page":
+        st.title("MPFM, MEMORY GAUGES & Simulation")
+        st.subheader("👈🏼 Select service from menu bar")
+        st.subheader("About the web site:")
+        st.markdown(
+            """
                     Upload row data from the MPFM ROXAR unit or from the Down hole memory gauges or csv files from the DAQ system and get
                     an instant graph and data set based on your requirements.\n
                     You can generate graphs and adjust it to the duration you desire and caluclate the average values of the selected fields
@@ -69,177 +47,262 @@ def main():
                     - Number of trucks provided at a given time.
                     - Filling time.
                     - etc.
-                    ''')
-        st.write('---')
-        st.write("Feel free to follow me in my YouTube channel for more video on data processing")
-        image = Image.open(os.path.join(package_dir, 'Thumbnail/youtube.jpg'))
-        st.image(image, caption='youtube channel')
+                    """
+        )
+        st.write("---")
+        st.write(
+            "Feel free to follow me in my YouTube channel for more video on data processing"
+        )
+        image = Image.open(os.path.join(package_dir, "Thumbnail/youtube.jpg"))
+        st.image(image, caption="youtube channel")
 
-# ============================================================
-# ====================Spartek  Gauges=========================
-# ============================================================
-# Gauges Spartek
-    if window_ANTICOR == 'Spartek Gauges Upload':
-        st.title('Down Hole Gauges _Spartek_ 🌡')
-        st.markdown('''
+    # ============================================================
+    # ====================Spartek  Gauges=========================
+    # ============================================================
+    # Gauges Spartek
+    if window_ANTICOR == "Spartek Gauges Upload":
+        st.title("Down Hole Gauges _Spartek_ 🌡")
+        st.markdown(
+            """
                     The below is to manipulate __SPARTEK__ Down Hole Memory Gauges row data\n
                     The page can view the data, download the values after applying a reduction factor to excel
-                    ''')
-        with st.expander(label='Upload row data guidelines'):
-            st.warning('Ensure the txt file belongs to Spartek gauges and has the format as below')
-            image = Image.open(os.path.join(package_dir, 'Thumbnail/spartek.jpg'))
+                    """
+        )
+        with st.expander(label="Upload row data guidelines"):
+            st.warning(
+                "Ensure the txt file belongs to Spartek gauges and has the format as below"
+            )
+            image = Image.open(os.path.join(package_dir, "Thumbnail/spartek.jpg"))
             st.image(image)
-            source_data = st.file_uploader(label='Uplaod gauges data to web page', type=['csv', 'log', 'txt'])
-            st.write('---')
+        source_data = st.file_uploader(
+            label="Uplaod gauges data to web page", type=["csv", "log", "txt"]
+        )
+        st.write("---")
         try:
             Gauges_data_Spartek(source_data)
             col1, col2 = st.columns(2)
         except Exception:
-            st.subheader('No Data available!!')
-            st.write('Select correct data for Metrolog gauges')
+            st.subheader("No Data available!!")
+            st.write("Select correct data for Metrolog gauges")
 
-# ============================================================
-# ====================Metrolog Gauges=========================
-# ============================================================
-# Gauges Metrolg
-    if window_ANTICOR == 'Metrolog Gauges Upload':
-        st.title('Down Hole Gauges _Metrolog_ 🌡')
-        st.markdown('''
+    # ============================================================
+    # ====================Metrolog Gauges=========================
+    # ============================================================
+    # Gauges Metrolg
+    if window_ANTICOR == "Metrolog Gauges Upload":
+        st.title("Down Hole Gauges _Metrolog_ 🌡")
+        st.markdown(
+            """
                     The below is to manipulate __METROLOG__ Down Hole Memory Gauges row data\n
                     The page can view the data, download the values after applying a reduction factor to excel
-                    ''')
-        source_data = st.file_uploader(label='Uplaod gauges data to web page', type=['csv', 'log', 'txt'])
-        st.write('---')
+                    """
+        )
+        source_data = st.file_uploader(
+            label="Uplaod gauges data to web page", type=["csv", "log", "txt"]
+        )
+        st.write("---")
         try:
             Gauges_data(source_data)
             col1, col2 = st.columns(2)
         except Exception:
-            st.subheader('No Data available!!')
-            st.write('Select correct data for Spartek gauges')
+            st.subheader("No Data available!!")
+            st.write("Select correct data for Spartek gauges")
 
-# MPFM Upload
-    if window_ANTICOR == 'MPFM Upload':
-        st.title('Multiphase Meter Data 🔬')
-        st.markdown('''
+    # ============================================================
+    # ====================MPFM Upload files=======================
+    # ============================================================
+    # MPFM Upload
+    if window_ANTICOR == "MPFM Upload":
+        st.title("Multiphase Meter Data 🔬")
+        st.markdown(
+            """
                     The below is to view and the multiphase meter of type __ROXAR__ online \n
                     The page can view the data, download the summary values to excel and
                     graph the data using a custom graph up to 4 values.
-                    ''')
-        source_data = st.file_uploader(label='Uplaod MPFM data to web page', type=['csv', 'log', 'txt'])
-        st.write('---')
+                    """
+        )
+        source_data = st.file_uploader(
+            label="Uplaod MPFM data to web page", type=["csv", "log", "txt"]
+        )
+        st.write("---")
         try:
             MPFM_data(source_data)
             col1, col2 = st.columns(2)
         except Exception:
-            st.subheader('No data selected')
-            st.write('Select the correct data for the MPFM')
+            st.subheader("No data selected")
+            st.write("Select the correct data for the MPFM")
 
-# ============================================================
-# ==================DATA Acquisition System===================
-# ============================================================
-# DAQ Upload
-    if window_ANTICOR == 'DAQ Upload':
-        st.title('DAQ Data Acquisition System 💽')
-        st.markdown('''
+    # ============================================================
+    # ==================DATA Acquisition System===================
+    # ============================================================
+    # DAQ Upload
+    if window_ANTICOR == "DAQ Upload":
+        st.title("DAQ Data Acquisition System 💽")
+        st.markdown(
+            """
                     The below page is to view the Data Acquisition system of type __FEKETE__ or __FIELD NOTE__ online \n
                     The page can view the data, download the summary values to excel and graph the data using a custom graph up to 4 values
-                    ''')
-        with st.expander(label='Upload row data guidelines'):
-            st.warning('Ensure the csv file has only one header and date start with yyy-mm-dd format')
-            image = Image.open(os.path.join(package_dir, 'Thumbnail/DAQ data.jpg'))
+                    """
+        )
+        with st.expander(label="Upload row data guidelines"):
+            st.warning(
+                "Ensure the csv file has only one header and date start with yyy-mm-dd format"
+            )
+            image = Image.open(os.path.join(package_dir, "Thumbnail/DAQ data.jpg"))
             st.image(image)
 
-        source_data = st.file_uploader(label='Uplaod MPFM data to web page', type=['csv', 'log', 'txt'])
-        st.write('---')
+        source_data = st.file_uploader(
+            label="Uplaod MPFM data to web page", type=["csv", "log", "txt"]
+        )
+        st.write("---")
         try:
             daq_data(source_data)
         except Exception:
-            st.subheader('No data selected')
-            st.write('Select the correct data for the MPFM')
+            st.subheader("No data selected")
+            st.write("Select the correct data for the MPFM")
 
-# ============================================================
-# ===================Stimulation trucks=======================
-# ============================================================
-# Simulation of loading trucks
-    if window_ANTICOR == 'Loading Simulation':
-        st.title('Trucks Loading Simulation 🚚')
-        st.markdown('''
+    # ============================================================
+    # ===================Stimulation trucks=======================
+    # ============================================================
+    # Simulation of loading trucks
+    if window_ANTICOR == "Loading Simulation":
+        st.title("Trucks Loading Simulation 🚚")
+        st.markdown(
+            """
                     The below is to __simulate__ the number of trucks that can be loaded in a loading station \n
                     The input below is used to change the simulation variables and see the final results below
-                    ''')
-        with st.expander(label='Usage guidelines'):
-            st.info('''Choose the number of __loading stations__, __time to fill__ each
-                    truck, __number of trucks__ provided at a certain time and the
-                    other parameters and see the number of trucks that can be
-                    filed in the given duration
-                    ''')
+                    """
+        )
+        with st.expander(label="Usage guidelines"):
+            st.info(
+                """Choose the number of __loading stations__, __time to fill__ each
+                    truck, __number of trucks__ provided at a certain time
+                    and see the number of trucks that can be
+                    filled in the at a duration
 
-        with st.form(key='simulation_form'):
+                Paramters:
+                1- Number of loading stations
+                2- Time of filling duration (in minutes)
+                3- Number of trucks provided at any given time
+                4- Loading duration (12 or 24 hours)
+                    """
+            )
+
+        with st.form(key="simulation_form"):
             col1, col2, col3, col4 = st.columns(4)
-            no_stations   = int(col1.number_input('loading stations', 1))
-            loading_time  = int(col2.number_input('Loading time in minutes', 30, step = 5))
-            no_trucks     = int(col3.number_input('No of trucks', 1))
-            duration      = int(col4.selectbox('Loading time in minutes', [720, 1440]))
-            submit = st.form_submit_button(label='Submit')
-            env = simpy.Environment()
-            env.process(setup(env, no_stations, loading_time, 10, no_trucks))
-            env.run(until=duration)
+            no_stations = int(col1.number_input("loading stations", 1))
+            loading_time = int(col2.number_input("Loading time in minutes", 30, step=5))
+            no_trucks = int(col3.number_input("No of trucks", 1))
+            duration = int(col4.selectbox("Loading time in hours", [12, 24]))
+            submit = st.form_submit_button(label="Submit")
+            if submit:
+                env = simpy.Environment()
+                env.process(setup(env, no_stations, loading_time, 10, no_trucks))
+                env.run(until=duration*60)
 
-
-    if window_ANTICOR == 'File Name':
-        st.title('Name files for operation')
-        st.markdown('''
+    if window_ANTICOR == "File Name":
+        st.title("Name files for operation")
+        st.markdown(
+            """
         This page is to get a new file name for the different docuements generatred
         while doing operaiton in well testing such as Final report name convention,
         Down hole gauges data, final report for SWT, DST, SLS etc.
-                    ''')
+                    """
+        )
 
-        with st.form(key='file_form'):
+        with st.form(key="file_form"):
             col1, col2, col3, col4 = st.columns(4)
-            bu = col1.text_input(label='BU')
-            bl = col2.text_input(label='BL')
-            date_start = col3.date_input('Start date')
-            date_end = col4.date_input('End date')
-            client_name = col1.text_input(label='Clinet name')
-            well_name = col2.text_input(label='Well name')
-            job_id = col3.text_input(label='Job ID')
-            service_desc = col4.text_input(label='Service')
-            zone_desc = col1.text_input(label='Zone/DST')
-            submit = st.form_submit_button(label='Submit')
+            bu = col1.text_input(label="BU")
+            bl = col2.text_input(label="BL")
+            date_start = col3.date_input("Start date")
+            date_end = col4.date_input("End date")
+            client_name = col1.text_input(label="Clinet name")
+            well_name = col2.text_input(label="Well name")
+            job_id = col3.text_input(label="Job ID")
+            service_desc = col4.text_input(label="Service")
+            zone_desc = col1.text_input(label="Zone/DST")
+            submit = st.form_submit_button(label="Submit")
 
             if submit:
-                st.subheader('With job ID')
-                st.write(f'Final Report Format with ID : **"{job_id} {client_name} {well_name} {zone_desc} final report from {date_start} to {date_end}"**')
-                st.write(f'Gauges Final Report Format : **"{job_id} {client_name} {well_name} {zone_desc} down hole gauges report from {date_start} to {date_end}"**')
-                st.write('---')
-                st.subheader('Without job ID')
-                st.write(f'Final Report Format : **"{client_name} {well_name} {zone_desc} final report from {date_start} to {date_end}"**')
-                st.write(f'Gauges Final Report Format : **"{client_name} {well_name} {zone_desc} down hole gauges report from {date_start} to {date_end}"**')
+                st.subheader("With job ID")
+                st.write(
+                    f'Final Report Format with ID : **"{job_id} {client_name} {well_name} {zone_desc} final report from {date_start} to {date_end}"**'
+                )
+                st.write(
+                    f'Gauges Final Report Format : **"{job_id} {client_name} {well_name} {zone_desc} down hole gauges report from {date_start} to {date_end}"**'
+                )
+                st.write("---")
+                st.subheader("Without job ID")
+                st.write(
+                    f'Final Report Format : **"{client_name} {well_name} {zone_desc} final report from {date_start} to {date_end}"**'
+                )
+                st.write(
+                    f'Gauges Final Report Format : **"{client_name} {well_name} {zone_desc} down hole gauges report from {date_start} to {date_end}"**'
+                )
 
-
-# added air compressor calculcaiton
-    if window_ANTICOR == 'Air-Oil Ration':
-        st.title('Air-oil Ratio Calcuation')
-        st.markdown('''
-        This page is didcated to calcualtion the percentage of the air to oil rate ratio
+    # ============================================================
+    # ====================Air Compressor Calculation==============
+    # ============================================================
+    # added air compressor calculcaiton
+    if window_ANTICOR == "Air-Oil Ration":
+        st.title("Air-oil Ratio Calcuation")
+        st.markdown(
+            """
+        This page is didcated to calcualtion the percentage of the air to oil rate ratio to get
+            the right size of air compressors for the best efficient burning
 
         Ensure to get the rate between 10% and 20% to have a good burning
-        ''')
+        """
+        )
+        with st.expander(label="Usage guidelines"):
+            st.info(
+                """ To get the air oil ratio update the following parameters
 
-        with st.form(key='file_form'):
+                Paramters:
+                1- Update the API
+                2- Oil rate in bbl per day BBL/d
+                3- Air rate in Cubic Feet Minute CFM
+                """
+            )
+
+        with st.form(key="file_form"):
             col1, col2, col3 = st.columns(3)
-            API_val = col1.number_input(label='API', step=0.5)
-            oil_rate = col2.number_input(label='Oil Rate', step=100)
-            air_rate = col3.number_input(label='Air Rate', step=100)
-            submit = st.form_submit_button(label='Submit')
+            API_val = col1.number_input(label="API", step=0.5, value=25.5)
+            oil_rate = col2.number_input(label="Oil Rate", step=100, value=2500)
+            air_rate = col3.number_input(label="Air Rate", step=100, value=200)
+            submit = st.form_submit_button(label="Submit")
 
             if submit:
-                lis = [100, 300, 500, 600, 700, 800, 900, 1000, 1200, 1500,
-                       1800, 2000, 2300, 2500, 2700, 3000]
-                for rate in range(len(lis)):
-                    new_air_rate = air_rate + lis[rate]
-                    calculate_the_values_of_air(API_val, new_air_rate, oil_rate)
+                y = []
+                x_x = [
+                    100,
+                    300,
+                    500,
+                    600,
+                    700,
+                    800,
+                    900,
+                    1000,
+                    1200,
+                    1500,
+                    1800,
+                    2000,
+                    2300,
+                    2500,
+                    2700,
+                    3000,
+                ]
+
+                for rate in range(len(x_x)):
+                    new_air_rate = air_rate + x_x[rate]
+                    x = calculate_the_values_of_air(API_val, new_air_rate, oil_rate)
+                    y.append(x)
+
+                fig = px.scatter(x=x_x, y=y, title='Air ratio' )
+                st.plotly_chart(fig)
 
 
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     main()

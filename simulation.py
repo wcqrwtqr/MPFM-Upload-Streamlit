@@ -11,6 +11,7 @@ class Loadingtruck(object):
     can start the loading processes and wait for it to finish (which
     takes ``loading time`` minutes).
     """
+
     def __init__(self, env, num_loading_station, loadingtime):
         self.env = env
         self.loadingstation = simpy.Resource(env, num_loading_station)
@@ -20,11 +21,14 @@ class Loadingtruck(object):
     def filltruck(self, truck, loadingtime):
         """The loading processes. It takes a ``Truck`` processes and starts
         to fill it oil."""
-        yield self.env.timeout(random.randint(loadingtime-10, loadingtime+10)) #####
+        yield self.env.timeout(
+            random.randint(loadingtime - 10, loadingtime + 10)
+        )  #####
 
     def drivetrucktostation(self, truck):
         """The moving process to enter the truck to loading processes. It takes a ``truck`` processes and tries."""
         yield self.env.timeout(random.randint(5, 15))
+
 
 def truck(env, name, cw, loadingtime):
     """The truck process (each truck has a ``name``) arrives at the loading stations
@@ -36,14 +40,18 @@ def truck(env, name, cw, loadingtime):
     with cw.loadingstation.request() as request:
         yield request
 
-        st.write(f'🚚....{name} drives to loading station at {round(env.now/60,0)} hours.')
+        st.write(
+            f"🚚....{name} drives to loading station at {round(env.now/60,0)} hours."
+        )
         yield env.process(cw.drivetrucktostation(name))
 
-        st.write('%s Start loading process at %.1f hours. 🕓 ' % (name, env.now/60))
+        st.write("%s Start loading process at %.1f hours. 🕓 " % (name, env.now / 60))
         yield env.process(cw.filltruck(name, loadingtime))
 
         yield env.process(cw.drivetrucktostation(name))
-        st.write('🏁.... %s left the loading station at %.1f hours.' % (name, env.now/60))
+        st.write(
+            "🏁.... %s left the loading station at %.1f hours." % (name, env.now / 60)
+        )
 
 
 def setup(env, num_loading_station, loadingtime, t_inter, no_trucks):
@@ -54,13 +62,11 @@ def setup(env, num_loading_station, loadingtime, t_inter, no_trucks):
 
     # Create x initial trucks
     for i in range(no_trucks):
-        env.process(truck(env, 'Truck %d' % i, loadingtruck, loadingtime))
+        env.process(truck(env, "Truck %d" % i, loadingtruck, loadingtime))
 
     # Create more trucks while the simulation is running
     while True:
         yield env.timeout(random.randint(t_inter - 5, t_inter + 5))
         i += 1
         # i += num_loading_station
-        env.process(truck(env, 'Truck %d' % i, loadingtruck, loadingtime))
-
-
+        env.process(truck(env, "Truck %d" % i, loadingtruck, loadingtime))
