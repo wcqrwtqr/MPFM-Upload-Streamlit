@@ -300,7 +300,7 @@ def main():
                     xy.append(new_air_rate)
 
                 fig = px.scatter(x=xy, y=y, title='Air oil Ratio for optimum burning' )
-                fig.add_hrect(y0=10, y1=20, line_width=0, fillcolor='green', opacity=0.2)
+                # fig.add_hrect(y0=10, y1=20, line_width=0, fillcolor='green', opacity=0.2)
                 st.plotly_chart(fig)
 
 
