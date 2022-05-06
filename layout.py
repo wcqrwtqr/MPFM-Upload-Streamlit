@@ -20,7 +20,7 @@ def main():
         "DAQ Upload",
         "Loading Simulation",
         # "File Name",
-        "Air-Oil Ration",
+        "Air-Oil Ratio",
     ]
     default_ix = values.index("Main Page")
     window_ANTICOR = st.sidebar.selectbox("Selection Window", values, index=default_ix)
@@ -37,7 +37,7 @@ def main():
             """
                     Upload row data from the MPFM ROXAR unit or from the Down hole memory gauges or csv files from the DAQ system and get
                     an instant graph and data set based on your requirements.\n
-                    You can generate graphs and adjust it to the duration you desire and caluclate the average values of the selected fields
+                    You can generate graphs and adjust it to the duration you desire and calculate the average values of the selected fields
                     then download it to csv.\n
                     The gauges used in our company are either __Metrolog__ or __Spartek__ and I made two sheets which can serve both conditions.\n
                     Also there is one page for simulating the loading of oil to trucks using loading stations which is a simple tool that 
@@ -112,10 +112,10 @@ def main():
     # ============================================================
     # MPFM Upload
     if window_ANTICOR == "MPFM Upload":
-        st.title("Multiphase Meter Data 🔬")
+        st.title("Multi-phase Meter Data 🔬")
         st.markdown(
             """
-                    The below is to view and the multiphase meter of type __ROXAR__ online \n
+                    The below is to view and the multi phase meter of type __ROXAR__ online \n
                     The page can view the data, download the summary values to excel and
                     graph the data using a custom graph up to 4 values.
                     """
@@ -203,8 +203,8 @@ def main():
         st.title("Name files for operation")
         st.markdown(
             """
-        This page is to get a new file name for the different docuements generatred
-        while doing operaiton in well testing such as Final report name convention,
+        This page is to get a new file name for the different documents generated
+        while doing operation in well testing such as Final report name convention,
         Down hole gauges data, final report for SWT, DST, SLS etc.
                     """
         )
@@ -243,12 +243,12 @@ def main():
     # ====================Air Compressor Calculation==============
     # ============================================================
     # added air compressor calculcaiton
-    if window_ANTICOR == "Air-Oil Ration":
-        st.title("Air-oil Ratio Calcuation")
+    if window_ANTICOR == "Air-Oil Ratio":
+        st.title("Air-oil Ratio Calcuator 🔥")
         st.markdown(
             """
-        This page is didcated to calcualtion the percentage of the air to oil rate ratio to get
-            the right size of air compressors for the best efficient burning
+        This page is didcated to calcualte the percentage of the air to oil ratio to get
+            the best air compressors capacity for the most efficient burning
 
         Ensure to get the rate between 10% and 20% to have a good burning
         """
@@ -273,7 +273,8 @@ def main():
 
             if submit:
                 y = []
-                x_x = [
+                xy = []
+                lis_x = [
                     100,
                     300,
                     500,
@@ -292,12 +293,14 @@ def main():
                     3000,
                 ]
 
-                for rate in range(len(x_x)):
-                    new_air_rate = air_rate + x_x[rate]
+                for rate in range(len(lis_x)):
+                    new_air_rate = air_rate + lis_x[rate]
                     x = calculate_the_values_of_air(API_val, new_air_rate, oil_rate)
                     y.append(x)
+                    xy.append(new_air_rate)
 
-                fig = px.scatter(x=x_x, y=y, title='Air ratio' )
+                fig = px.scatter(x=xy, y=y, title='Air oil Ratio for optimum burning' )
+                fig.add_hrect(y0=10, y1=20, line_width=0, fillcolor='green', opacity=0.2)
                 st.plotly_chart(fig)
 
 
