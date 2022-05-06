@@ -6,7 +6,6 @@ from simulation import Loadingtruck, setup
 import simpy
 from air_oil_ratio import calculate_the_values_of_air
 import plotly.express as px
-from bokeh.plotting import figure
 
 
 
