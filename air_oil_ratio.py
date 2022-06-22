@@ -28,12 +28,12 @@ def calculate_the_values_of_air(API_val, air_rate, oil_rate):
         if 10 <= air_oil_ratio <= 20:
             st.subheader(
                 f"At oil rate {oil_rate} and air rate of \
-                {air_rate} ration is: {air_oil_ratio:.2f}% ✅"
+                {air_rate} ratio is: {air_oil_ratio:.2f}% ✅"
             )
             return air_oil_ratio
         else:
             st.write(
                 f"At oil rate {oil_rate} and air rate of \
-                    {air_rate} ration is: {air_oil_ratio:.2f}% 🚫"
+                    {air_rate} ratio is: {air_oil_ratio:.2f}% 🚫"
             )
             return air_oil_ratio
