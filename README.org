@@ -6,17 +6,27 @@ This site handles the data used for the operaiton in OILSERV with several type o
 
 The data can be uploaded to the website of Heruko and it will perform a number of tasks such as:
 
-1. Data visulazation
-2. Data averging and download to csv files
-3. create a corrleation plot (for MPFM only)
+1. Data visualization
+2. Data averaging and download to csv files
+3. create a correlation plot (for MPFM only)
 4. Graph any axis from the data interactively
 
-Another added feature is to simulate the number of trucks needed to load oil from a well site or a loading station based on the time needed to fill a tanker vs the numner of loading stations avaialble.
+Another added feature is to simulate the number of trucks needed to load oil from a well site or a loading station based on the time needed to fill a tanker vs the number of loading stations available.
 
-This project uses the follwoing libraries:
+This project uses the following libraries:
 
  1. Streamlit
  2. Pandas
  3. Numpy
  4. Plotly
  5. seaboarn
+
+* Running in docker
+
+To use docker you can to be able to run the application locally from a container start by cloning the repo then run the below lines in the terminal
+
+#+begin_src bash
+docker build -t mpfm:latest . -f Dockerfile
+
+docker run -p 8501:8501 mpfm:latest
+#+end_src
