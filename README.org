@@ -30,3 +30,11 @@ docker build -t mpfm:latest . -f Dockerfile
 
 docker run -p 8501:8501 mpfm:latest
 #+end_src
+
+#+begin_src bash
+docker-compose up --buil
+#+end_src
+
+After the docker builds the image it will run the docker container and now you can access the web page using the below url
+
+http://localhost:8501
