@@ -31,6 +31,8 @@ docker build -t mpfm:latest . -f Dockerfile
 docker run -p 8501:8501 mpfm:latest
 #+end_src
 
+Or better to use the blow one command only
+
 #+begin_src bash
 docker-compose up --buil
 #+end_src
