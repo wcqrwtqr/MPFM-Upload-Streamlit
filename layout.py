@@ -9,6 +9,8 @@ import plotly.express as px
 from pvtcorrelation import *
 from wellanalysis import *
 import pandas as pd
+from nodalanalysis import *
+from nodal import *
 
 
 def main():
@@ -21,6 +23,7 @@ def main():
         "Spartek Gauges Upload",
         "Well Test Analysis",
         "PVT-Correlation",
+        "Nodal Analysis",
         "Loading Simulation",
         "Air-Oil Ratio",
         # "DAQ Upload",
@@ -44,7 +47,7 @@ def main():
                     You can generate graphs and adjust it to the duration you desire and calculate the average values of the selected fields
                     then download it to csv.\n
                     The gauges used in our company are either __Metrolog__ or __Spartek__ and I made two sheets which can serve both conditions.\n
-                    Also there is one page for simulating the loading of oil to trucks using loading stations which is a simple tool that 
+                    Also there is one page for simulating the loading of oil to trucks using loading stations which is a simple tool that
                     can be used to get the total number of trucks by changing the variables such as:\n
                     - Number of loading stations.
                     - Number of trucks provided at a given time.
@@ -77,10 +80,10 @@ def main():
             )
             image = Image.open(os.path.join(package_dir, "Thumbnail/spartek.jpg"))
             st.image(image)
-        source_data = st.file_uploader(
-            label="Uplaod gauges data to web page", type=["csv", "log", "txt"]
-        )
-        st.write("---")
+            source_data = st.file_uploader(
+                label="Uplaod gauges data to web page", type=["csv", "log", "txt"]
+            )
+            st.write("---")
         try:
             Gauges_data_Spartek(source_data)
             col1, col2 = st.columns(2)
@@ -355,6 +358,7 @@ def main():
                     Rs = gasoilratio(press_val, pbubble, sg_val, API_val, temp_val, Rsb_val)
                     # calculate gas-oil ratio using Vazquez and Beggs (1980); Beggs and Robinson (1975)
                     viscooil = oil_mu(press_val, pbubble, sg_val, API_val, temp_val, Rs)
+                    # col1, col2 = st.columns(2)
                     col1, col2 = st.columns(2)
                     col1.subheader('Your Input:')
                     col1.write('Pressure                     : {} psia'.format(press_val))
@@ -497,6 +501,189 @@ def main():
                         st.write("Select the correct data for the MPFM")
 
 
+    # ============================================================
+    # ====================Nodal analysis==============
+    # ============================================================
+    #
+    if window_ANTICOR == "Nodal Analysis":
+        st.title("Nodal Analysis IPR/VLR")
+        st.markdown(
+            """
+            This page is for making nodal analysis acknowledgement for
+
+            https://github.com/FreddyEcu-Ch/Oil-and-Gas-Resources
+
+            Please visit his page and star his work
+        """
+        )
+
+        with st.expander(label="Reservoir Inflow Behaviour with production test data"):
+            with st.form(key="file_form_nodalIPR"):
+                col1, col2, col3 = st.columns(3)
+                pr =col1.number_input(label="pr - Reservoir pressure (psia)", value=4000) #psi
+                pb =col1.number_input(label="pb - Bubble point pressure (psia)", value=3000) #psi
+                q_test =col2.number_input(label="q_test - Test oil flow rate (bpd)", value=1500) #bpd
+                pwf_test =col2.number_input(label="pwf_test - Flowing bottom pressure of test (psia)", value=2000) #bpd
+                method = col3.selectbox(
+                    "select method",
+                    ["Vogel", "IPR_compuesto", "Darcy"],)
+                pwf_graph =np.array([4000, 3500, 3000, 2500, 1000, 0]) # TDOD make the streamlit
+                pwf =col3.number_input(label="pwf - Flowing bottom pressure (psia)", value=4000) #np.array([4000, 3500, 3000, 2500, 1000, 0])
+
+                # source_data = st.file_uploader(
+                #     label="Upload drawdown file", type=["csv", "log", "txt"]
+                # )
+                st.write("---")
+                submit = st.form_submit_button(label="Submit")
+
+                if submit:
+                    # load well-test data
+                    try:
+                        col4, col5 = st.columns(2)
+                        col5.subheader('Solving for rates 0 to 5000 with step of 1000 BBL/d')
+                        fig = IPR_curve_methods(q_test, pwf_test, pr, pwf_graph, pb, method)
+                        x = aof(q_test, pwf_test, pr, pb)
+                        PI = j(q_test, pwf_test, pr, pb)
+                        q1 = qo(q_test, pwf_test,pr, pwf,pb)
+                        q2 = qo_darcy(q_test, pwf_test, pr, pwf, pb)
+                        q3 = qo_ipr_compuesto(q_test, pwf_test, pr, pwf, pb)
+                        q4 = qo_vogel(q_test, pwf_test, pr, pwf, pb)
+                        q5 = Qb(q_test, pwf_test, pr, pb, pb)
+                        col4.pyplot(fig)
+                        col5.write('AOF                          : {:.0f} BBL/d'.format(x))
+                        col5.write('PI                           : {:.1f} bpd/psi'.format(PI))
+                        col5.write('Qo                           : {:.1f} bpd'.format(q1))
+                        col5.write('Qo_darcy                           : {:.1f} bpd'.format(q2))
+                        col5.write('Qo_IPR                           : {:.1f} bpd'.format(q3))
+                        col5.write('Qo_vogel                           : {:.1f} bpd'.format(q4))
+                        col5.write('Qb_flow at bubble                           : {:.1f} bpd'.format(q5))
+
+                    except Exception:
+                        st.subheader("No data selected")
+                        st.write("Select the correct data for the MPFM")
+
+        with st.expander(label="Reservoir Inflow Behaviour Petrophysical and Fluid Properties"):
+            with st.form(key="file_form_nodal"):
+                col1, col2, col3 = st.columns(3)
+                pr =col1.number_input(label="pr - Reservoir pressure (psia)", value=4000) #psi
+                ko  =col1.number_input(label="Effective premeablity md", value=10)
+                h  =col1.number_input(label="h Reservoir hieght ft", value=50)
+                bo =col2.number_input(label="bo Formation volume factor rb/stb", value=1.2)
+                uo =col2.number_input(label="uo Oil viscosity cp", value=1.2)
+                re =col3.number_input(label="re Drainage radius ft", value=3000)
+                rw =col3.number_input(label="rw Well radius ft", value=0.328)
+                s  =col3.number_input(label="s Skin", value=0)
+                st.write("---")
+                submit = st.form_submit_button(label="Submit")
+
+                if submit:
+                    try:
+                        q1 = j_darcy(ko, h, bo, uo, re, rw, s)
+                        AOF = q1 * pr
+                        st.subheader("Results for AOF and PI")
+                        col4, col5 = st.columns(2)
+                        col4.write('AOF                          : {:.0f} BBL/d'.format(AOF))
+                        col5.write('PI                           : {:.3f} bpd'.format(q1))
+
+                    except Exception:
+                        st.subheader("No data selected")
+                        st.write("Select the correct data for the MPFM")
+
+
+        with st.expander(label="Nodal analysis"):
+            with st.form(key="file_form_nodalp"):
+                col1, col2, col3 = st.columns(3)
+                THP = col1.number_input(label="THP - Pressure psi" , value=250 )#psia
+                wc = col1.number_input(label="wc - water cut %" , value=0.75)
+                sg_h2o = col1.number_input(label="SG" , value=1.04)
+                API = col2.number_input(label="API" , value=30)
+                Q = col2.number_input(label="Q - Flow rate bpd" , value=2500 )#bpd
+                ID = col2.number_input(label="ID inch" , value=2.875 )#in
+                tvd = col3.number_input(label="tvd - True vertical depth" , value=6000 )#ft
+                md = col3.number_input(label="md - Measured depth" , value=6600 )#ft
+                C = col3.number_input(label="C - Factor" , value=120)
+                st.write("---")
+                submit = st.form_submit_button(label="Submit")
+
+                if submit:
+                    try:
+                        SG_Avg = sg_avg(API, wc, sg_h2o)
+                        Gavg = gradient_avg(API, wc, sg_h2o)
+                        Pg = Gavg * tvd
+                        f = f_darcy(Q, ID, C)
+                        Pf = f_darcy(Q, ID, C) * md * Gavg
+                        po = THP + Pf + Pg
+                        fig = vlp_curve(THP, API, wc, sg_h2o, md, tvd, ID, C)
+
+
+                        col4, col5 = st.columns(2)
+                        col4.write(f"THP ->     {THP} psia")
+                        col4.write(f'SG avg ->       {SG_Avg:.4f}')
+                        col4.write(f'Gradient avg -> {Gavg:.3f} psi/ft')
+                        col4.write(f'Pressure due to gravity -> {Pg:.1f} psia')
+                        col5.write(f' f Friction factor -> {f:.5f}')
+                        col5.write(f"Pf Pressure due friction -> {Pf:.2f} psia")
+                        col5.subheader(f'Po Total Dynamic Head -> {po:.2f} psia')
+                        st.pyplot(fig)
+
+
+                    except Exception:
+                        st.subheader("No data selected")
+                        st.write("Select the correct data for the MPFM")
+
+        with st.expander(label="IPR vs VLP"):
+            with st.form(key="file_form_nodalvlp"):
+                col1, col2, col3 = st.columns(3)
+                THP = col1.number_input(label="THP - Pressure psi" , value=250 )#psia
+                wc = col1.number_input(label="wc - water cut %" , value=0.75)
+                sg_h2o = col1.number_input(label="SG" , value=1.04)
+                API = col2.number_input(label="API" , value=30)
+                Q = col2.number_input(label="Q - Flow rate bpd" , value=2500 )#bpd
+                ID = col2.number_input(label="ID inch" , value=2.875 )#in
+                tvd = col3.number_input(label="tvd - True vertical depth" , value=6000 )#ft
+                md = col3.number_input(label="md - Measured depth" , value=6600 )#ft
+                C = col3.number_input(label="C - Factor" , value=120)
+
+                pr =col1.number_input(label="pr - Reservoir pressure (psia)", value=4000) #psi
+                pb =col1.number_input(label="pb - Bubble point pressure (psia)", value=3000) #psi
+                q_test =col2.number_input(label="q_test - Test oil flow rate (bpd)", value=1500) #bpd
+                pwf_test =col2.number_input(label="pwf_test - Flowing bottom pressure of test (psia)", value=2000) #bpd
+                method = col3.selectbox(
+                    "select method",
+                    ["Vogel", "Darcy"],)
+                # pwf_graph =np.array([4000, 3500, 3000, 2500, 1000, 0]) # TDOD make the streamlit
+                pwf =col3.number_input(label="pwf - Flowing bottom pressure (psia)", value=4000) #np.array([4000, 3500, 3000, 2500, 1000, 0])
+
+
+
+                st.write("---")
+                submit = st.form_submit_button(label="Submit")
+
+                if submit:
+                    try:
+                        SG_Avg = sg_avg(API, wc, sg_h2o)
+                        Gavg = gradient_avg(API, wc, sg_h2o)
+                        Pg = Gavg * tvd
+                        f = f_darcy(Q, ID, C)
+                        Pf = f_darcy(Q, ID, C) * md * Gavg
+                        po = THP + Pf + Pg
+                        fig = IPR_vlp_curve(THP,API, wc, sg_h2o, md, tvd, ID, C, q_test, pwf_test,  pr, pb, method)
+
+
+                        col4, col5 = st.columns(2)
+                        col4.write(f"THP ->     {THP} psia")
+                        col4.write(f'SG avg ->       {SG_Avg:.4f}')
+                        col4.write(f'Gradient avg -> {Gavg:.3f} psi/ft')
+                        col4.write(f'Pressure due to gravity -> {Pg:.1f} psia')
+                        col5.write(f' f Friction factor -> {f:.5f}')
+                        col5.write(f"Pf Pressure due friction -> {Pf:.2f} psia")
+                        col5.subheader(f'Po Total Dynamic Head -> {po:.2f} psia')
+                        st.pyplot(fig)
+
+
+                    except Exception:
+                        st.subheader("No data selected")
+                        st.write("Select the correct data for the MPFM")
 
 if __name__ == "__main__":
     main()
