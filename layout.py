@@ -6,7 +6,9 @@ from simulation import Loadingtruck, setup
 import simpy
 from air_oil_ratio import calculate_the_values_of_air
 import plotly.express as px
-
+from pvtcorrelation import *
+from wellanalysis import *
+import pandas as pd
 
 
 def main():
@@ -17,10 +19,12 @@ def main():
         "MPFM Upload",
         "Metrolog Gauges Upload",
         "Spartek Gauges Upload",
-        "DAQ Upload",
+        "Well Test Analysis",
+        "PVT-Correlation",
         "Loading Simulation",
-        # "File Name",
         "Air-Oil Ratio",
+        # "DAQ Upload",
+        # "File Name",
     ]
     default_ix = values.index("Main Page")
     window_ANTICOR = st.sidebar.selectbox("Selection Window", values, index=default_ix)
@@ -303,6 +307,194 @@ def main():
                 # fig.add_hrect(y0=10, y1=20, line_width=0, fillcolor='green', opacity=0.2)
                 st.plotly_chart(fig)
 
+
+    # ============================================================
+    # ====================PVT corrleation==============
+    # ============================================================
+    # added air compressor calculcaiton
+    if window_ANTICOR == "PVT-Correlation":
+        st.title("PVT correlation")
+        st.markdown(
+            """
+            This page is used to calculate the PVT parametes
+            The calculations are computed based on the script done by
+
+            https://github.com/yohanesnuwara/pyreservoir repositry
+
+            Please visit his page and star his work
+        """
+        )
+        # with st.expander(label="Usage guidelines"):
+        #     st.info(
+        #         """ To get the OIL parameters
+        #         Paramters:
+        #         1- xxxx
+        #         2- xxxx
+        #         3- xxxx
+        #         """
+        #     )
+
+        with st.expander(label="OIL PVT"):
+            with st.form(key="file_form"):
+                col1, col2, col3, col4 = st.columns(4)
+                sg_val = col1.number_input(label="SG", step=0.10, value=0.75)
+                temp_val = col2.number_input(label="Temperature F", step=5, value=150)
+                Rsb_val = col3.number_input(label="Solution GOR", step=10, value=300)
+                API_val = 141.5 / (sg_val) - 131.5
+                press_val = col4.number_input(label="Pressure psi", step=10, value=300)
+                submit = st.form_submit_button(label="Submit")
+
+                if submit:
+                    # calculate bubble-point pressure using Vasquez and Beggs (1980)
+                    pbubble = oil_pbubble(Rsb_val, sg_val ,API_val, temp_val)
+                    # calculate isothermal compressibility using Vazquez and Beggs (1980); McCain et al (1988)
+                    coil = oil_compressibility(press_val, pbubble, temp_val, API_val, Rsb_val, sg_val)
+                    # calculate FVF using Vazquez and Beggs (1980); Levitan and Murtha (1999)
+                    Bo = oil_fvf(pbubble, API_val, Rsb_val, sg_val, temp_val, press_val)
+                    # calculate gas-oil ratio using Vazquez and Beggs (1980)
+                    Rs = gasoilratio(press_val, pbubble, sg_val, API_val, temp_val, Rsb_val)
+                    # calculate gas-oil ratio using Vazquez and Beggs (1980); Beggs and Robinson (1975)
+                    viscooil = oil_mu(press_val, pbubble, sg_val, API_val, temp_val, Rs)
+                    col1, col2 = st.columns(2)
+                    col1.subheader('Your Input:')
+                    col1.write('Pressure                     : {} psia'.format(press_val))
+                    col1.write('Temperature                  : {} °F'.format(temp_val))
+                    col1.write('Specific Gravity             : {}'.format(sg_val))
+                    col1.write('Gas-oil ratio @ Bubble-point : {} scf/STB'.format(Rsb_val))
+                    col1.write('Oil gravity                  : {:.2f} API \n'.format(API_val))
+
+                    col2.subheader('PVT Output:')
+                    col2.write('Bubble-point Pressure        : {:.2f} psi'.format(pbubble))
+                    col2.write('Gas-oil ratio                : {:.2f} scf/STB'.format(Rs))
+                    col2.write('FVF                          : {:.2f} RB/STB'.format(Bo))
+                    col2.write('Isothermal compressibility   : {:.2f} microsip'.format(coil * 1E+6))
+                    col2.write('Viscosity                    : {:.3f} cp'.format(viscooil))
+
+        with st.expander(label="Gas PVT"):
+            with st.form(key="file_form_gas"):
+                col1, col2, col3, col4, col5 = st.columns(5)
+                press_val = col1.number_input(label="Pressure psi", step=10, value=2000)
+                temp_val = col2.number_input(label="Temperature F", step=5, value=110)
+                sg_val = col3.number_input(label="SG", step=0.10, value=0.7)
+                h2s_val = col4.number_input(label="HS %", step=0.01, value=0.07)
+                co2_val = col5.number_input(label="Co2 %", step=0.01, value=0.07)
+                submit = st.form_submit_button(label="Submit")
+
+                if submit:
+                    # calculate pseudoproperties using Sutton (1985), Wichert and Aziz (1972)
+                    P_pc, T_pc, P_pr, T_pr = gas_pseudoprops(temp_val, press_val, sg_val, h2s_val, co2_val)
+
+                    # calculate z-factor using Dranchuk-Aboukassem (1975)
+                    pseudo_rho, z_factor = gas_zfactor(T_pr, P_pr)
+
+                    # calculate density
+                    rhogas = gas_density(temp_val, press_val, sg_val, z_factor)
+
+                    # calculate gas FVF
+                    Bg = gas_fvf(z_factor, temp_val, press_val)
+
+                    # calculate isothermal compressibility using Trube (1957) and Mattar (1975)
+                    cgas = gas_compressibility(T_pr, P_pr, pseudo_rho, z_factor, P_pc)
+
+                    # calculate viscosity using Lee et al (1966)
+                    viscogas = gas_mu(temp_val, rhogas, sg_val)
+
+                    col1, col2 = st.columns(2)
+                    col1.subheader('Your Input:')
+                    col1.write('Pressure                   : {} psia'.format(press_val))
+                    col1.write('Temperature                : {} °F'.format(temp_val))
+                    col1.write('Specific Gravity           : {:.2f}'.format(sg_val))
+                    col1.write('H2S Mole Fraction          : {}'.format(h2s_val))
+                    col1.write('CO2 Mole Fraction          : {} \n'.format(co2_val))
+
+                    col2.subheader('PVT Output:')
+                    col2.write('z-factor                   : {:.4f}'.format(z_factor))
+                    col2.write('Density                    : {:.2f} lb/ft3'.format(rhogas))
+                    col2.write('FVF                        : {:.3f} res ft3/scf'.format(Bg))
+                    col2.write('Isothermal compressibility : {:.3f} microsip'.format(cgas * 1E+6))
+                    col2.write('Viscosity                  : {:.4f} cp'.format(viscogas))
+
+
+        with st.expander(label="Water PVT"):
+            with st.form(key="file_form_water"):
+                col1, col2, col3, col4, col5 = st.columns(5)
+                press_val = col1.number_input(label="Pressure psi", step=10, value=2000)
+                temp_val = col2.number_input(label="Temperature F", step=5, value=110)
+                s_val = col3.number_input(label="Salinity, wt%", step=1, value=5)
+                submit = st.form_submit_button(label="Submit")
+
+                if submit:
+                    # calculate water FVF using McCain et al (1989)
+                    Bw = water_fvf(temp_val, press_val)
+
+                    # calculate vapor (bubble-point) press_val using the classic Antoine (1888)
+                    pbubble = water_pbubble(temp_val)
+
+                    # calculate isothermal water compressibility using Osif (1988) and McCain (1989)
+                    cw = water_compressibility(temp_val, press_val, s_val, Bw)
+
+                    # calculate water viscosity using McCain (1989)
+                    mu_w = water_mu(temp_val, press_val, s_val)
+
+                    col1, col2 = st.columns(2)
+                    col1.subheader('Your Input:')
+                    col1.write('Pressure                     : {} psia'.format(press_val))
+                    col1.write('Temperature                  : {} °F'.format(temp_val))
+                    col1.write('Salinity                     : {} \n'.format(s_val / 100))
+
+                    col2.subheader('PVT Output:')
+                    col2.write('FVF                          : {:.4f} RB/STB'.format(Bw))
+                    col2.write('Bubble-Point Press_val        : {:.3f} psia'.format(pbubble))
+                    col2.write('Isothermal Compressibility   : {:.4f} microsip'.format(cw * 1E+6))
+                    col2.write('Viscosity                    : {:.4f} cp'.format(mu_w))
+
+    # ============================================================
+    # ====================Well Test Analysis==============
+    # ============================================================
+    #
+    if window_ANTICOR == "Well Test Analysis":
+        st.title("Well Test Analysis")
+        st.markdown(
+            """
+            This page is used to form well test analysis
+            The calculations are computed based on the script done by
+
+            https://github.com/yohanesnuwara/pyreservoir repositry
+
+            Please visit his page and star his work
+        """
+        )
+
+        with st.expander(label="Constant Rate Drawdown Test"):
+            with st.form(key="file_form_analysis"):
+                col1, col2, col3= st.columns(3)
+                poro = col1.number_input(label="Porosity", step=0.10, value=0.15) # Porosity
+                rw =col1.number_input(label="Wellbore Radius ft", step=0.10, value=0.333)  # Wellbore radius, ft
+                h = col2.number_input(label="Reservoir thickness ft", step=1, value=32) # Reservoir thickness, ft
+                # ct = col2.number_input(label="Total Compressibilitym, sip", step=0.10, value=12E-06)  # Total compressibility, sip
+                ct = col2.number_input(label="Total Compressibilitym, sip",step=0.00001, value=0.000012)  # Total compressibility, sip
+                mu_oil = col3.number_input(label="Oil viscosity, cp", step=1, value=2)  # Total compressibility, sip
+                pi = col2.number_input(label="Reservoir Inital Pressure, psi", value=2500) # Initial reservoir pressure, psia
+                Bo =col1.number_input(label="Oil FVF, RB/STB", value=0.133) # Oil FVF, RB/STB
+                q = col3.number_input(label="well rate", value=1000)
+                your_guess =  col3.number_input(label="guess time index", value=30)
+                source_data = st.file_uploader(
+                    label="Upload drawdown file", type=["csv", "log", "txt"]
+                )
+                st.write("---")
+                submit = st.form_submit_button(label="Submit")
+
+                if submit:
+                    # load well-test data
+                    try:
+                        df = pd.read_csv(source_data, sep=",")
+                        t = df['t'].values
+                        p = df['p'].values
+                        # I modified the function below to return the st.pyplot(fig) and draw a graph
+                        constant_rate_drawdown_test(t, p, q, Bo, mu_oil, h, poro, ct, rw, pi, your_guess)
+                    except Exception:
+                        st.subheader("No data selected")
+                        st.write("Select the correct data for the MPFM")
 
 
 

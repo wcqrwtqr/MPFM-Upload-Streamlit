@@ -30,6 +30,7 @@ def Gauges_data_Spartek(source_file, row=20):
         sep="\s+",
         header=None,
         skiprows=row,
+        # names=["date", "time", "AMPM", "elpse", "pressure", "temperature"],
         names=["date", "time", "AMPM", "elpse", "pressure", "temperature"],
         engine="python",
     )
@@ -86,6 +87,11 @@ def Gauges_data(source_file, row=20):
     )
     range_data = df.index.tolist()
     df["date_time"] = df["date"] + " " + df["time"]
+    # df['date_time'] = pd.to_datetime(df['date_time'], format='%d/%m/%y %H:%M:%S') ## new added
+    # df['date_time']=pd.to_datetime(df['date'] + ' ' + df['time'], dayfirst=False)
+    # position = df.columns.get_loc('time')
+    # df['elapsed'] =  df.iloc[1:, position] - df.iat[0, position]
+
     range_data_selection = st.slider(
         "Range:",
         min_value=min(range_data),
