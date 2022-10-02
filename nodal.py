@@ -32,7 +32,6 @@ def IPR_curve(q_test, pwf_test, pr, pwf:list, pb):
     plt.axhline(y=pb, color='r', linestyle='--')
     plt.axvline(x=Qb(q_test, pwf_test, pr, pb), color='r', linestyle='--')
     ax.grid()
-
     st.pyplot(fig)
     # plt.show()
 
@@ -51,6 +50,7 @@ def IPR_curve_methods(q_test, pwf_test, pr, pwf:list, pb, method, ef=1, ef2=None
         # Stand the axis of the IPR plot
     x = df['Qo(bpd)']
     y = df['Pwf(psia)']
+    # st.dataframe(df)
     # The following steps are used to smooth the curve
     X_Y_Spline = make_interp_spline(x, y)
     X_ = np.linspace(x.min(), x.max(), 500)
@@ -86,7 +86,6 @@ def vlp_curve(THP, API, wc, sg_h2o, md, tvd, ID, C ):
     df['F (ft)'] = df['f'] * md
     df['Pf (psia)'] = df['F (ft)'] * gradient_avg(API, wc, sg_h2o)
     df['Po (psia)'] = df['THP (psi)'] + df['Pgravity (psia)'] + df['Pf (psia)']
-
     fig, ax = plt.subplots(figsize=(20, 10))
     ax.plot(df['Q'], df['Po (psia)'], c='g')
     ax.set_xlabel('Q (BPD)', fontsize=14)
@@ -113,7 +112,8 @@ def IPR_vlp_curve(THP, API, wc, sg_h2o, md, tvd, ID, C, q_test, pwf_test,  pr, p
     df[columns[6]] = gradient_avg(API, wc, sg_h2o) * df['F(ft)']
     df[columns[7]] = df['THP(psia)'] + df['Pgravity(psia)'] + df['Pf(psia)']
     df[columns[8]] = df['Po(psia)'] - df['Pwf(psia)']
-
+    # st.dataframe(df)
+    # Graphing the results
     fig, ax = plt.subplots(figsize=(20, 10))
     ax.plot(df['Q(bpd)'], df['Pwf(psia)'], c='red', label='IPR')
     ax.plot(df['Q(bpd)'], df['Po(psia)'], c='green', label='VLP')

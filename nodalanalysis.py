@@ -201,7 +201,7 @@ def qo_standing(q_test, pwf_test, pr, pwf, pb, ef=1, ef2=None):
 
 #Qo(bpd) @ vogel conditions
 #Qo(bpd) @ all conditions
-def qo(q_test, pwf_test, pr, pwf, pb, ef=1, ef2=None):
+def qo_t(q_test, pwf_test, pr, pwf, pb, ef=1, ef2=None):
     if ef == 1 and ef2 is None:
         if pr > pb: # Yac. subsaturado
             if pwf >= pb:

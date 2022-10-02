@@ -9,7 +9,7 @@ COPY . /app
 
 WORKDIR /app
 # RUN pip install --upgrade pip
-RUN pip install --upgrade pip && pip install --no-cache-dir pandas Pillow streamlit openpyxl plotly seaborn simpy scipy matplotlib
+RUN pip install --upgrade pip && pip install --no-cache-dir pandas Pillow streamlit openpyxl plotly seaborn simpy scipy matplotlib math
 
 EXPOSE 8501
 
