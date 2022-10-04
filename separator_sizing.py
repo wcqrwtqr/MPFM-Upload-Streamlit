@@ -40,7 +40,7 @@ def separator_trif_horizontal(qg, qo, qw, Api, sg_gas, sg_w, P, T, Z, uo , uw, u
     # Calculate Aw/A
     Aw_A = 0.5 * ((qw * trw) / (tro * qo + trw * qw))
     # Determine beta from the figure using the AW/A value
-    st.write(f'Aw/A equals = {Aw_A} please update the beta and run again ☝🏼 ')
+    st.write(f'Aw/A equals = **{Aw_A:.2f}** please update the beta and run again ☝🏼 ')
     # beta = float(input(f'Enter the value of beta read from figure 6. If AW/A is {Aw_A}->'))
     # Calculate dmax
     d_max = ho_max / beta
@@ -58,12 +58,11 @@ def separator_trif_horizontal(qg, qo, qw, Api, sg_gas, sg_w, P, T, Z, uo , uw, u
                                 (4 / 3) * tabla['Liq_Leff(ft)'])
     tabla['SR'] = (12 * tabla['Lss(ft)']) / tabla['d(in)']
     tabla_res = tabla.loc[tabla['SR'] > 3]
-    # st.table(f"\nResults Table: \n {tabla.to_markdown()}")
     st.dataframe(tabla)
-    st.write("\nOptimal Results Table:\n Engineers must select a slenderness radius between 3 and 5")
+    # st.write("\nOptimal Results Table:\n Engineers must select a slenderness radius between 3 and 5")
+    st.markdown("Optimal Results Table:\n Engineers must select a slenderness radius between **3 and 5**")
     st.dataframe(tabla_res)
     # return tabla_res
-
 
 # Function to size a two-phase vertical separator
 def separator_trif_vertical(qg, qo, qw, Api, sg_gas, sg_w, P, T, z, uo, uw, ug, tro, trw, dm_g=100, dm_o=200, dm_w=500):
@@ -107,7 +106,6 @@ def separator_trif_vertical(qg, qo, qw, Api, sg_gas, sg_w, P, T, z, uo, uw, ug, 
     st.write("\nOptimal Results Table:\n Engineers must select a slenderness radius between 1.5 and 3")
     st.dataframe(df)
     # return df
-
 
 # Function to size a two-phase horizontal separator
 def separator_bif_horizontal(qg, ql, Api, sg_gas, P, T, z, ug, tr, dm=140):
@@ -157,8 +155,6 @@ def separator_bif_horizontal(qg, ql, Api, sg_gas, P, T, z, ug, tr, dm=140):
     tabla_res = tabla.loc[(tabla['12LSS/d'] > 2.9) & (tabla['12LSS/d'] < 4)]
     st.dataframe(tabla_res)
     # return tabla_res
-
-
 
 # Function to size a two-phase vertical separator
 def separator_bif_vertical(qg, ql, Api, sg_gas, P, T, z, ug, dm=140):
