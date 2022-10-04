@@ -28,7 +28,7 @@ def main():
         "Well Test Analysis",
         "Loading Simulation",
         "Air-Oil Ratio",
-        "Pressure drop",
+        # "Pressure drop",
         # "DAQ Upload",
         # "File Name",
     ]
