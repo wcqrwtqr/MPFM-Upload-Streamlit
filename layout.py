@@ -12,7 +12,6 @@ import pandas as pd
 from nodalanalysis import *
 from nodal import *
 from separator_sizing import *
-from pressuredrop import *
 
 def main():
     "Main function of the page"
@@ -28,9 +27,7 @@ def main():
         "Well Test Analysis",
         "Loading Simulation",
         "Air-Oil Ratio",
-        # "Pressure drop",
         # "DAQ Upload",
-        # "File Name",
     ]
     default_ix = values.index("Main Page")
     window_ANTICOR = st.sidebar.selectbox("Selection Window", values, index=default_ix)
@@ -463,6 +460,15 @@ def main():
                         q4 = qo_vogel(q_test, pwf_test, pr, pwf, pb)
                         q5 = Qb(q_test, pwf_test, pr, pb, pb)
                         # Creating dataframe and putting all the values inside it
+                        col4.write('AOF                          : {:.0f} BBL/d'.format(x))
+                        col4.write('PI                           : {:.1f} bpd/psi'.format(PI))
+                        col4.write('Qo                           : {:.1f} bpd'.format(q1))
+                        col4.write('Qo_darcy                           : {:.1f} bpd'.format(q2))
+                        col5.write('Qo_IPR                           : {:.1f} bpd'.format(q3))
+                        col5.write('Qo_vogel                           : {:.1f} bpd'.format(q4))
+                        col5.write('Qb_flow at bubble                           : {:.1f} bpd'.format(q5))
+                        st.write("---")
+                        st.caption('Solving for rates 0 to 5000 with step of 1000 BBL/d')
                         columns = ['AOF', 'PI', 'Qo', 'Qo_darcy', 'Qo_IPR', 'Qo_vogel', 'Qb_flow at bubble']
                         df = pd.DataFrame(columns=columns)
                         df[columns[0]] = np.array([0])
@@ -535,6 +541,7 @@ def main():
                         Pf = f_darcy(Q, ID, C) * md * Gavg
                         po = THP + Pf + Pg
                         fig = vlp_curve(THP, API, wc, sg_h2o, md, tvd, ID, C)
+                        # fig, fig2 = vlp_curve(THP, API, wc, sg_h2o, md, tvd, ID, C)
                         # Creating dataframe and putting all the values inside it
                         columns = ['THP', 'SG avg', 'Gradient avg', 'Pressure due gravity', 'f friction', 'Pf Pressure due friction', 'Po Total Head']
                         df = pd.DataFrame(columns=columns)
@@ -550,7 +557,7 @@ def main():
                         st.pyplot(fig)
                     except Exception:
                         st.subheader("No data selected")
-                        st.write("Select the correct data for the MPFM")
+                        st.write("Select the correct data for the IPR")
 
         ####################### IPR vs VLP curve tab ################################
         with st.expander(label="IPR vs VLP"):
@@ -588,7 +595,7 @@ def main():
                         fig = IPR_vlp_curve(THP,API, wc, sg_h2o, md, tvd, ID, C, q_test, pwf_test,  pr, pb, method)
                         # Creating dataframe and putting all the values inside it
                         columns = ['THP', 'SG avg', 'Gradient avg', 'Pressure due gravity', 'f friction', 'Pf Pressure due friction', 'Po Total Head', 'AOF','PI']
-                        df = pd.DataFrame(columns=columns)
+                        df = pd.DataFrame()
                         df[columns[0]] = np.array([0])
                         df[columns[0]] = THP
                         df[columns[1]] = SG_Avg
@@ -741,91 +748,6 @@ def main():
                         st.subheader("No data selected")
                         st.write("Select the correct data for the Separtor")
 
-
-
-    # ============================================================
-    # ====================Pressure Drop ==============
-    # ============================================================
-    #
-    if window_ANTICOR == "Pressure drop":
-        st.title("Pressure drop calculation")
-        st.markdown(
-            """
-            This page is for presure drop calculation\n
-            https://github.com/bsmeaton/PipePressureDrop.git\n
-            Please visit his page and star his work
-        """
-        )
-        ####################### Pressure drop ################################
-        # with st.expander(label="Pipe Pressure drop"):
-            # image1 = Image.open(os.path.join(package_dir, "Thumbnail/beta.jpg"))
-            # st.image(image1, caption="Beta for seprator")
-        with st.expander(label="Pipe pressure drop calulcator"):
-            with st.form(key="file_form_pipedrop"):
-                # image = Image.open(os.path.join(package_dir, "Thumbnail/threephase_separator.png"))
-                # st.image(image, caption="3 phase separator")
-                st.subheader('Input parameters')
-                st.write("---")
-                col1, col2, col3, col4 = st.columns(4)
-                fluidkey = col1.selectbox("select fluid",
-                                          ["Diesel25", "Diesel40", "HFO20", "HFO40", "HFO50",
-                                           "HFO70", "HFO98", "Water", "TLX 304 oil 100",
-                                           "TLX 304 oil 40", "Urea(32% solution)", "Natural Gas",
-                                           "HFO (Gen Int)", "Natural Gas", "HFO 9", "HFO 180 40",
-                                           "HFO 180 70",],)
-                # viscosity =col4.number_input(label="Viscosity", value=0.3 ) # from grpah
-                # denisty =col4.number_input(label="Density", value=0.7 ) # from grpah
-                pipeno =col1.number_input(label="No of pipes", value=10 )
-                # pipsize = col1.selectbox("select pipe type", ["Diesel25", "water", "etc"],)
-                pipekey = col1.selectbox("select pipe type",
-                                         ["DN300", "DN250", "DN251", "DN200", "DN150", "DN100",
-                                          "DN25," "DN40," "DN50," "DN65," "DN80," "DN10," "omega",],)
-                flowrate =col2.number_input(label="Flow rate in l/h", value=200 )
-                pipelen =col2.number_input(label="Pipe length in m", value=5 )
-                rr =col2.number_input(label="rr fraction", value=0.046 )
-                st.write("---")
-                submit = st.form_submit_button(label="Submit")
-                if submit:
-                    # load well-test data
-                    try:
-                        flowrate= float(flowrate) * float(2.778*10**-7)
-                        viscosity = ""
-                        density = ""
-                        pdtotal = 0
-                        with open("./Thumbnail/data/fluidlist.txt") as fluidfile:
-                            for line in fluidfile:
-                                if line.split(',')[0] == fluidkey:
-                                    viscosity = float(line.split(',')[3])
-                                    density = float(line.split(',')[1])
-                                    # st.write('Found fluid: ' + fluidkey)
-                        for x in range(0, pipeno):
-                            # flowrate= float(("Choose pipe flow rate in l/hr for pipe "  + str(x+1) + ": "))*float(2.778*10**-7)
-                            # pipekey = str(input("Choose Pipe Size for pipe " + str(x+1) + ": (e.g. DN80, DN100): "))
-                            # print('Calculating ' + str(x+1) + ' of ' + str(pipeno) + ' pipes in piping system')
-                            with open("./Thumbnail/data/pipelist.txt") as pipefile:
-                                for line in pipefile:
-                                    if line.split(',')[0] == pipekey:
-                                        pipeid = float(line.split(',')[1])/1000
-                                        # st.write('Found pipe: ' + pipekey )
-                            # pipelen = float(input("Pipe length in m for pipe "  + str(x+1) + "?: "))
-                            #fluidlist = np.atleast_1d(np.genfromtxt("fluidlist.txt", delimiter=",", dtype=None,comments='#'))
-                            #pipelist = np.atleast_1d(np.genfromtxt("pipelist.txt", delimiter=",", dtype=None,comments='#'))
-                            #print('\n \nList of pipe sizes in file (1-n)\n\n' + str(pipelist))
-                            #print('\n \nList of fluid types in file (1-n) \n\n' + str(fluidlist))
-                            pipelengtheqv = pipelen
-                            head = 0
-                            pd, velocity, reynum  = PressureDrop(pipelengtheqv,viscosity,flowrate,head,pipeid,rr,density)
-                            pdtotal += pd
-                            st.write('Pipe ID: ' + str(pipeid) + 'm')
-                            st.write('Velocity: ' + str(velocity) + 'm/s')
-                            st.write('Flowrate used for pipe '  + str(x+1) + ' is : ' + str(flowrate) + 'm^3/s')
-                            st.write('Pressure drop for pipe '  + str(x+1) + " is :" + str(pd) + ' Bar\n')
-                        st.write('Viscosity used is: ' + str(viscosity) + 'm^2/s')
-                        st.write('Total Pressure drop is :' + str(pdtotal) + ' Bar')
-                        # input("Press Enter to quit")
-                    except Exception:
-                        st.subheader("No data selected")
-                        st.write("Select the correct data for the pipes")
 
 
 if __name__ == "__main__":

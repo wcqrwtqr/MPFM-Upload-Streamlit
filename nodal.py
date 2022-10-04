@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import make_interp_spline, BSpline
 from nodalanalysis import *
 import streamlit as st
+import plotly.express as px
 
 def IPR_curve(q_test, pwf_test, pr, pwf:list, pb):
     # Creating Dataframe
