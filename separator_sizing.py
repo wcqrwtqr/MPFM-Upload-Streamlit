@@ -50,14 +50,15 @@ def separator_trif_horizontal(qg, qo, qw, Api, sg_gas, sg_w, P, T, Z, uo , uw, u
     d2Leff = 1.42 * (qw * trw + qo * trw)
     # Create resulst table
     tabla = pd.DataFrame()
-    tabla['d(in)'] = np.arange(60, d_max + 1, 12)
+    tabla['d(in)'] = np.arange(36, d_max + 1, 6)
+    # tabla['d(in)'] =[24, 30, 36, 42, 48, 52, 58]
     tabla['Gas_Leff(ft)'] =  dLeff / tabla['d(in)']
     tabla['Liq_Leff(ft)'] = d2Leff / tabla['d(in)']**2
     tabla['Lss(ft)'] = np.where(tabla['Gas_Leff(ft)'] > tabla['Liq_Leff(ft)'],\
                                 tabla['Gas_Leff(ft)'] + (tabla['d(in)'] / 12),\
                                 (4 / 3) * tabla['Liq_Leff(ft)'])
     tabla['SR'] = (12 * tabla['Lss(ft)']) / tabla['d(in)']
-    tabla_res = tabla.loc[tabla['SR'] > 3]
+    tabla_res = tabla.loc[ (tabla['SR'] > 3) & (tabla['SR'] < 6)]
     st.dataframe(tabla)
     # st.write("\nOptimal Results Table:\n Engineers must select a slenderness radius between 3 and 5")
     st.markdown("Optimal Results Table:\n Engineers must select a slenderness radius between **3 and 5**")

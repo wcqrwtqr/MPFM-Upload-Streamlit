@@ -80,10 +80,10 @@ def main():
             )
             image = Image.open(os.path.join(package_dir, "Thumbnail/spartek.jpg"))
             st.image(image)
-            source_data = st.file_uploader(
-                label="Uplaod gauges data to web page", type=["csv", "log", "txt"]
-            )
-            st.write("---")
+        source_data = st.file_uploader(
+            label="Uplaod gauges data to web page", type=["csv", "log", "txt"]
+        )
+        st.write("---")
         try:
             Gauges_data_Spartek(source_data)
             col1, col2 = st.columns(2)

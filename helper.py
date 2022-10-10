@@ -1,9 +1,39 @@
+from pickle import STRING
 import pandas as pd
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from graphing import graphing_line_arg
+
+
+@st.experimental_memo
+def load_df_spartek(source_file, row:int):
+    ''' This helper funciton to cache the dataframe to memoery so there is no
+    extensive computation evey time we change the values
+
+    :param source_file: file path
+    :type source_file: string
+    :param row: number of rows
+    :type row: int
+
+    :returns: df , range_data
+    :rtype: dataframe"""
+
+    '''
+    df = pd.read_csv(
+        source_file,
+        sep="\s+",
+        header=None,
+        skiprows=row,
+        # names=["date", "time", "AMPM", "elpse", "pressure", "temperature"],
+        names=["date", "time", "AMPM", "elpse", "pressure", "temperature"],
+        engine="python",
+    )
+    df["date_time"] = df["date"] + " " + df["time"] + " " + df["AMPM"]
+    range_data = df.index.tolist()
+
+    return df, range_data
 
 
 def Gauges_data_Spartek(source_file, row=20):
@@ -25,17 +55,18 @@ def Gauges_data_Spartek(source_file, row=20):
     row :
         row
     """
-    df = pd.read_csv(
-        source_file,
-        sep="\s+",
-        header=None,
-        skiprows=row,
-        # names=["date", "time", "AMPM", "elpse", "pressure", "temperature"],
-        names=["date", "time", "AMPM", "elpse", "pressure", "temperature"],
-        engine="python",
-    )
-    range_data = df.index.tolist()
-    df["date_time"] = df["date"] + " " + df["time"] + " " + df["AMPM"]
+    df, range_data = load_df_spartek(source_file, row)
+    # df = pd.read_csv(
+    #     source_file,
+    #     sep="\s+",
+    #     header=None,
+    #     skiprows=row,
+    #     # names=["date", "time", "AMPM", "elpse", "pressure", "temperature"],
+    #     names=["date", "time", "AMPM", "elpse", "pressure", "temperature"],
+    #     engine="python",
+    # )
+    # range_data = df.index.tolist()
+    # df["date_time"] = df["date"] + " " + df["time"] + " " + df["AMPM"]
     range_data_selection = st.slider(
         "Range:",
         min_value=min(range_data),
@@ -44,14 +75,11 @@ def Gauges_data_Spartek(source_file, row=20):
     )
     # Creating the masked df from the index
     df_lst = df[range_data_selection[0] : range_data_selection[1]]
-
     # Showing the graphs
     st.markdown(
         f'Max __Temperature__: {df_lst["temperature"].max()} - Max __Pressure__: {df_lst["pressure"].max()}'
     )
     st.markdown(f"*Available Data: {df_lst.shape[0]}")
-    # st.markdown('Pressure Temperature Graph')
-
     with st.expander(label="Table of Data"):
         NN = st.selectbox("Interval", [1, 2, 5, 10, 15, 20, 30, 50])
         st.dataframe(df_lst.loc[:: int(NN)])
@@ -66,6 +94,35 @@ def Gauges_data_Spartek(source_file, row=20):
 # ********************************************************************
 # *************** Gauges Function for Metrolg Gauges******************
 # ********************************************************************
+
+# @st.cache
+@st.experimental_memo
+def load_df_metorlog(source_file, row:int):
+    ''' This helper funciton to cache the dataframe to memoery so there is no
+    extensive computation evey time we change the values
+
+    :param source_file: file path
+    :type source_file: string
+    :param row: number of rows
+    :type row: int
+
+    :returns: df , range_data
+    :rtype: dataframe"""
+
+    '''
+    df = pd.read_csv(
+        source_file,
+        sep="[,\t]",
+        header=None,
+        skiprows=row,
+        names=["date", "time", "pressure", "temperature"],
+        engine="python",
+    )
+    df["date_time"] = df["date"] + " " + df["time"]
+    range_data = df.index.tolist()
+    return df, range_data
+
+
 def Gauges_data(source_file, row=20):
     """Gauges data processing generator
 
@@ -77,21 +134,7 @@ def Gauges_data(source_file, row=20):
     :returns: None
     :rtype: None"""
 
-    df = pd.read_csv(
-        source_file,
-        sep="[,\t]",
-        header=None,
-        skiprows=row,
-        names=["date", "time", "pressure", "temperature"],
-        engine="python",
-    )
-    range_data = df.index.tolist()
-    df["date_time"] = df["date"] + " " + df["time"]
-    # df['date_time'] = pd.to_datetime(df['date_time'], format='%d/%m/%y %H:%M:%S') ## new added
-    # df['date_time']=pd.to_datetime(df['date'] + ' ' + df['time'], dayfirst=False)
-    # position = df.columns.get_loc('time')
-    # df['elapsed'] =  df.iloc[1:, position] - df.iat[0, position]
-
+    df, range_data = load_df_metorlog(source_file, row)
     range_data_selection = st.slider(
         "Range:",
         min_value=min(range_data),
@@ -105,7 +148,6 @@ def Gauges_data(source_file, row=20):
         f'Max __Temperature__: {df_lst["temperature"].max()} - Max __Pressure__: {df_lst["pressure"].max()}'
     )
     st.markdown(f"*Available Data: {df_lst.shape[0]}")
-
     with st.expander(label="Table of Data"):
         NN = st.selectbox("Interval", [1, 2, 5, 10, 15, 20, 30, 50])
         st.dataframe(df_lst.loc[:: int(NN)])
@@ -121,7 +163,6 @@ def Gauges_data(source_file, row=20):
 # ********************************************************************
 # ************** MPFM Function ***************************************
 # ********************************************************************
-
 
 def MPFM_data(source_file):
     """MPFM data processing generator
@@ -154,7 +195,6 @@ def MPFM_data(source_file):
     # graph are not affected when using the multi select (df_header) which will
     # affect the rest of the graphs
     df_lst2 = df_lst[df_header]
-
     # Averages calculation
     avg_P = np.average(df_lst["Pressure"])
     avg_T = np.average(df_lst["Temperature"])
@@ -172,16 +212,8 @@ def MPFM_data(source_file):
     API = 141.5 / (avg_oilSG / 1000) - 131.5
     # start           = df_lst['Clock'][range_data_selection[0]] + ' ' + df_lst['Date'][range_data_selection[0]]
     # end             = df_lst['Clock'][range_data_selection[1]-1] + ' ' + df_lst['Date'][range_data_selection[1]-1]
-    start = (
-        df_lst["date_time"][range_data_selection[0]]
-        + " "
-        + df_lst["Date"][range_data_selection[0]]
-    )
-    end = (
-        df_lst["date_time"][range_data_selection[1] - 1]
-        + " "
-        + df_lst["Date"][range_data_selection[1] - 1]
-    )
+    start = (df_lst["date_time"][range_data_selection[0]] + " " + df_lst["Date"][range_data_selection[0]])
+    end = (df_lst["date_time"][range_data_selection[1] - 1] + " " + df_lst["Date"][range_data_selection[1] - 1])
     # Making the dataframe
     dict_summary = {
         "Start Time": start,
@@ -202,7 +234,6 @@ def MPFM_data(source_file):
         "Water SG": avg_waterSG,
     }
     summary = pd.DataFrame([dict_summary])
-
     st.markdown(f"*Available Data: {df_lst2.shape[0]}")
     gas_rate_float = "{:.4f}".format(avg_std_gasRate)
     st.markdown(
@@ -216,7 +247,6 @@ def MPFM_data(source_file):
         col6, col7 = st.columns(2)
         graphing_line_arg(df_lst, "date_time", col6, ["Pressure", "dP"])
         graphing_line_arg(df_lst, "date_time", col7, ["Std.OilFlowrate", "GOR(std)"])
-
     # making the average table along with a graph
     with st.expander(label="Average table"):
         # Select the columns that we need to see the average and graph for it
@@ -232,7 +262,6 @@ def MPFM_data(source_file):
             data=df_lst[avg_selection].mean().to_csv(),
             mime="text/csv",
         )
-
     # Showing the data set with the needed columns
     with st.expander(label="Data Set"):
         NN = st.selectbox("Interval", [1, 5, 10, 15, 20, 30])
@@ -250,15 +279,12 @@ def MPFM_data(source_file):
         st.download_button(
             label="Download Summary", data=summary.to_csv(), mime="text/csv"
         )
-
     with st.expander(label="Custom Graph"):
         SS = st.multiselect("Select Headers", header_list[2:-2])
         graphing_line_arg(df_lst, "date_time", st, SS)
-
     with st.expander(label="Custom Graph 2"):
         com = st.multiselect("Select headers", header_list[2:-2])
         graphing_line_arg(df_lst, "date_time", st, com)
-
     with st.expander(label="Correlation"):
         selector = st.multiselect("select one", header_list[2:-2])
         cmp = st.selectbox(
@@ -297,7 +323,6 @@ def daq_data(source_file):
         max_value=max(range_data),
         value=(min(range_data), max(range_data)),
     )
-
     # Creating the masked df from the index
     df_header = st.sidebar.multiselect("Data Columns", header_list, default=header_list)
     df_lst = df[range_data_selection[0] : range_data_selection[1]]
@@ -306,7 +331,6 @@ def daq_data(source_file):
     # affect the rest of the graphs
     df_lst2 = df_lst[df_header]
     st.markdown(f"*Available Data: {df_lst2.shape[0]}")
-
     # making the average table along with a graph
     with st.expander(label="Average table"):
         # Select the columns that we need to see the average and graph for it
@@ -322,7 +346,6 @@ def daq_data(source_file):
             data=df_lst[avg_selection].mean().to_csv(),
             mime="text/csv",
         )
-
     # Showing the Data set and removing any unwanted columns
     with st.expander(label="Data Set"):
         # Select the interval that will reduce the number of rows
@@ -335,13 +358,11 @@ def daq_data(source_file):
             data=df_lst2.loc[:: int(NN)].to_csv(),
             mime="text/csv",
         )
-
     # Custom graph 1
     with st.expander(label="Custom Graph"):
         col4, col5 = st.columns(2)
         SS = st.multiselect("Select Headers", header_list[2:-2])
         graphing_line_arg(df_lst, "date_time", st, SS)
-
     # Custom graph 2
     with st.expander(label="Custom Graph 2"):
         com = st.multiselect("Select headers", header_list[2:])
