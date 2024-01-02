@@ -429,7 +429,7 @@ def main():
         st.title("Nodal Analysis IPR/VLR")
         st.markdown(
             """
-            This page is for making nodal analysis acknowledgement for https://github.com/FreddyEcu-Ch/Oil-and-Gas-Resources Please visit his page and star his work
+            This page is for making nodal analysis acknowledgement for https://github.com/FreddyEcu-Ch/Oil-and-Gas-Resources\n Please visit his page and star his work
         """
         )
 

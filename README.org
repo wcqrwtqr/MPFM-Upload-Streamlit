@@ -2,16 +2,21 @@
 
 * Streamlit data visualizer
 
-This site handles the data used for the operaiton in OILSERV with several type of equipment such as MPFM from ROXAR, metrolog and spartek down hole gauges as well was a page for simulating the number of trucks to load oil from well site based on the time of loading.
+This site handles the data used for the operation in OILSERV with several type of equipment such as MPFM from ROXAR, metrolog and spartek down hole gauges as well was a page for simulating the number of trucks to load oil from well site based on the time of loading.
 
-The data can be uploaded to the website of Heruko and it will perform a number of tasks such as:
++The data can be uploaded to the website of Heruko and it will perform a number of tasks such as:+
+
+The data can be uploaded to the website of either on streamlit page or run it locally on your machine and it will perform a number of tasks such as:
 
 1. Data visualization
 2. Data averaging and download to csv files
-3. create a correlation plot (for MPFM only)
+3. Create a correlation plot (for MPFM only)
 4. Graph any axis from the data interactively
+5. Make PVT data generation for oil and gas
+6. Compute the air compressor size capacity needed for operation
+7. Sizing for pressure separator
+8. Simulate the number of expected trucks while loading operation of oil into trucks
 
-Another added feature is to simulate the number of trucks needed to load oil from a well site or a loading station based on the time needed to fill a tanker vs the number of loading stations available.
 
 This project uses the following libraries:
 
@@ -19,19 +24,24 @@ This project uses the following libraries:
  2. Pandas
  3. Numpy
  4. Plotly
- 5. seaboarn
+ 5. Seaboarn
 
-* Running in docker
+* Running the app in your local machine using docker or docker-compose
 
-To use docker you can to be able to run the application locally from a container start by cloning the repo then run the below lines in the terminal
+To use docker you can to be able to run the application locally from a container start by cloning the repository then run the below lines in the terminal
 
 #+begin_src bash
+# clone the repo to your pc
+git clone <github repo url>
+# cd into the folder
+cd /MPFM-Upload-Streamlit
+# build docker image using the command below
 docker build -t mpfm:latest . -f Dockerfile
-
+# run the docker container
 docker run -p 8501:8501 mpfm:latest
 #+end_src
 
-Or better to use the blow one command only
+Or better to use the blow one command only (Recommended)
 
 #+begin_src bash
 docker-compose up --buil
@@ -40,3 +50,8 @@ docker-compose up --buil
 After the docker builds the image it will run the docker container and now you can access the web page using the below url
 
 http://localhost:8501
+
+* Next actions
+** TODO Update the version of the dependencies
+** TODO Update the UI with new elemens ts of the streamlit library
+** TODO Add other tabs for conversion rates and other

@@ -1,4 +1,4 @@
-FROM python:3.9-slim-bullseye
+FROM python:3.10-slim-bullseye
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK 1
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -17,7 +17,9 @@ COPY . /app
 WORKDIR /app
 # RUN pip install --upgrade pip
 # RUN pip install --upgrade pip && pip install --no-cache-dir pandas Pillow streamlit openpyxl plotly seaborn simpy scipy matplotlib
-RUN pip install --upgrade pip && pip install --no-cache-dir -r new_req.txt
+#RUN pip install --upgrade pip && pip install --no-cache-dir -r new_req.txt
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r new_req.txt
 
 EXPOSE 8501
 
