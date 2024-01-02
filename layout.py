@@ -13,6 +13,7 @@ from nodalanalysis import *
 from nodal import *
 from separator_sizing import *
 
+
 def main():
     "Main function of the page"
     st.set_page_config(page_title="MPFM and Gauges", layout="wide")
@@ -37,7 +38,9 @@ def main():
     # ====================Start Up Page===========================
     # ============================================================
     if window_ANTICOR == "Main Page":
-        st.title("Oil field tool kit - Reservoir Engineering, MPFM, Memory gauges & Simulation")
+        st.title(
+            "Oil field tool kit - Reservoir Engineering, MPFM, Memory gauges & Simulation"
+        )
         st.subheader("👈🏼 Select service from menu bar")
         st.subheader("About the web site:")
         st.markdown(
@@ -201,8 +204,7 @@ def main():
             if submit:
                 env = simpy.Environment()
                 env.process(setup(env, no_stations, loading_time, 10, no_trucks))
-                env.run(until=duration*60)
-
+                env.run(until=duration * 60)
 
     # ============================================================
     # ====================Air Compressor Calculation==============
@@ -235,18 +237,34 @@ def main():
             if submit:
                 y = []
                 xy = []
-                lis_x = [100, 300, 500, 600, 700, 800, 900,
-                    1000, 1200, 1500, 1800, 2000, 2300, 2500,
-                    2700, 3000,]
+                lis_x = [
+                    100,
+                    300,
+                    500,
+                    600,
+                    700,
+                    800,
+                    900,
+                    1000,
+                    1200,
+                    1500,
+                    1800,
+                    2000,
+                    2300,
+                    2500,
+                    2700,
+                    3000,
+                ]
                 for rate in range(len(lis_x)):
                     new_air_rate = air_rate + lis_x[rate]
                     x = calculate_the_values_of_air(API_val, new_air_rate, oil_rate)
                     y.append(x)
                     xy.append(new_air_rate)
-                fig = px.scatter(x=xy, y=y, title='Air oil Ratio for optimum burning' )
-                fig.add_hrect(y0=10, y1=20, line_width=0, fillcolor='green', opacity=0.2)
+                fig = px.scatter(x=xy, y=y, title="Air oil Ratio for optimum burning")
+                fig.add_hrect(
+                    y0=10, y1=20, line_width=0, fillcolor="green", opacity=0.2
+                )
                 st.plotly_chart(fig)
-
 
     # ============================================================
     # ====================PVT corrleation==============
@@ -272,17 +290,32 @@ def main():
                 submit = st.form_submit_button(label="Submit")
                 if submit:
                     # calculate bubble-point pressure using Vasquez and Beggs (1980)
-                    pbubble = oil_pbubble(Rsb_val, sg_val ,API_val, temp_val)
+                    pbubble = oil_pbubble(Rsb_val, sg_val, API_val, temp_val)
                     # calculate isothermal compressibility using Vazquez and Beggs (1980); McCain et al (1988)
-                    coil = oil_compressibility(press_val, pbubble, temp_val, API_val, Rsb_val, sg_val)
+                    coil = oil_compressibility(
+                        press_val, pbubble, temp_val, API_val, Rsb_val, sg_val
+                    )
                     # calculate FVF using Vazquez and Beggs (1980); Levitan and Murtha (1999)
                     Bo = oil_fvf(pbubble, API_val, Rsb_val, sg_val, temp_val, press_val)
                     # calculate gas-oil ratio using Vazquez and Beggs (1980)
-                    Rs = gasoilratio(press_val, pbubble, sg_val, API_val, temp_val, Rsb_val)
+                    Rs = gasoilratio(
+                        press_val, pbubble, sg_val, API_val, temp_val, Rsb_val
+                    )
                     # calculate gas-oil ratio using Vazquez and Beggs (1980); Beggs and Robinson (1975)
                     viscooil = oil_mu(press_val, pbubble, sg_val, API_val, temp_val, Rs)
                     # col1, col2 = st.columns(2)
-                    columns = ['Pressure (psi)', 'Temperature (°F)', 'Specific Gravity', 'Gas-oil ratio (scf/STB)','API','Bubble point (psi)','GOR (scf/STB)','FVF RB/STB', 'Isothermal Compressibility (microcip)', 'Viscosity (cp)']
+                    columns = [
+                        "Pressure (psi)",
+                        "Temperature (°F)",
+                        "Specific Gravity",
+                        "Gas-oil ratio (scf/STB)",
+                        "API",
+                        "Bubble point (psi)",
+                        "GOR (scf/STB)",
+                        "FVF RB/STB",
+                        "Isothermal Compressibility (microcip)",
+                        "Viscosity (cp)",
+                    ]
                     df = pd.DataFrame(columns=columns)
                     df[columns[0]] = np.array([0])
                     df[columns[0]] = press_val
@@ -293,15 +326,17 @@ def main():
                     df[columns[5]] = pbubble
                     df[columns[6]] = Rs
                     df[columns[7]] = Bo
-                    df[columns[8]] = coil*1_000_000
+                    df[columns[8]] = coil * 1_000_000
                     df[columns[9]] = viscooil
                     st.dataframe(df)
-                    st.markdown("""
+                    st.markdown(
+                        """
                     * calculate bubble-point pressure using Vasquez and Beggs (1980)
                     * calculate isothermal compressibility using Vazquez and Beggs (1980); McCain et al (1988)
                     * calculate FVF using Vazquez and Beggs (1980); Levitan and Murtha (1999)
                     * calculate gas-oil ratio using Vazquez and Beggs (1980); Beggs and Robinson (1975)
-                    """)
+                    """
+                    )
 
         with st.expander(label="Gas PVT"):
             with st.form(key="file_form_gas"):
@@ -314,7 +349,9 @@ def main():
                 submit = st.form_submit_button(label="Submit")
                 if submit:
                     # calculate pseudoproperties using Sutton (1985), Wichert and Aziz (1972)
-                    P_pc, T_pc, P_pr, T_pr = gas_pseudoprops(temp_val, press_val, sg_val, h2s_val, co2_val)
+                    P_pc, T_pc, P_pr, T_pr = gas_pseudoprops(
+                        temp_val, press_val, sg_val, h2s_val, co2_val
+                    )
                     # calculate z-factor using Dranchuk-Aboukassem (1975)
                     pseudo_rho, z_factor = gas_zfactor(T_pr, P_pr)
                     # calculate density
@@ -325,7 +362,16 @@ def main():
                     cgas = gas_compressibility(T_pr, P_pr, pseudo_rho, z_factor, P_pc)
                     # calculate viscosity using Lee et al (1966)
                     viscogas = gas_mu(temp_val, rhogas, sg_val)
-                    columns = ['Pressure (psi)', 'Temperature (°F)', 'Specific Gravity', 'z-factor', 'Density (lb/ft3)','FVF ft3/scf', 'Isothermal Compressibility (microcip)', 'Viscosity (cp)']
+                    columns = [
+                        "Pressure (psi)",
+                        "Temperature (°F)",
+                        "Specific Gravity",
+                        "z-factor",
+                        "Density (lb/ft3)",
+                        "FVF ft3/scf",
+                        "Isothermal Compressibility (microcip)",
+                        "Viscosity (cp)",
+                    ]
                     df = pd.DataFrame(columns=columns)
                     df[columns[0]] = np.array([0])
                     df[columns[0]] = press_val
@@ -334,15 +380,17 @@ def main():
                     df[columns[3]] = z_factor
                     df[columns[4]] = rhogas
                     df[columns[5]] = Bg
-                    df[columns[6]] = cgas*1_000_000
+                    df[columns[6]] = cgas * 1_000_000
                     df[columns[7]] = viscogas
                     st.dataframe(df)
-                    st.markdown("""
+                    st.markdown(
+                        """
                     * calculate pseudoproperties using Sutton (1985), Wichert and Aziz (1972)
                     * calculate z-factor using Dranchuk-Aboukassem (1975)
                     * calculate isothermal compressibility using Trube (1957) and Mattar (1975)
                     * calculate viscosity using Lee et al (1966)
-                    """)
+                    """
+                    )
 
         with st.expander(label="Water PVT"):
             with st.form(key="file_form_water"):
@@ -360,7 +408,15 @@ def main():
                     cw = water_compressibility(temp_val, press_val, s_val, Bw)
                     # calculate water viscosity using McCain (1989)
                     mu_w = water_mu(temp_val, press_val, s_val)
-                    columns = ['Pressure (psi)', 'Temperature (°F)', 'Salinity', 'FVF (RB/STB)', 'Bubble-Point (psia)', 'Isothermal Compressibility (microcip)', 'Viscosity (cp)']
+                    columns = [
+                        "Pressure (psi)",
+                        "Temperature (°F)",
+                        "Salinity",
+                        "FVF (RB/STB)",
+                        "Bubble-Point (psia)",
+                        "Isothermal Compressibility (microcip)",
+                        "Viscosity (cp)",
+                    ]
                     df = pd.DataFrame(columns=columns)
                     df[columns[0]] = np.array([0])
                     df[columns[0]] = press_val
@@ -368,15 +424,17 @@ def main():
                     df[columns[2]] = s_val
                     df[columns[3]] = Bw
                     df[columns[4]] = pbubble
-                    df[columns[5]] = cw*1_000_000
+                    df[columns[5]] = cw * 1_000_000
                     df[columns[6]] = mu_w
                     st.dataframe(df)
-                    st.markdown("""
+                    st.markdown(
+                        """
                     * calculate water FVF using McCain et al (1989)
                     * calculate vapor (bubble-point) press_val using the classic Antoine (1888)
                     * calculate isothermal water compressibility using Osif (1988) and McCain (1989)
                     * calculate water viscosity using McCain (1989)
-                    """)
+                    """
+                    )
 
     # ============================================================
     # ====================Well Test Analysis==============
@@ -389,21 +447,36 @@ def main():
             This page is used to form well test analysis\n
             The calculations are computed based on the script done by https://github.com/yohanesnuwara/pyreservoir repositry\n
             please visit his page and star his work
-        """)
+        """
+        )
 
         with st.expander(label="Constant Rate Drawdown Test"):
             with st.form(key="file_form_analysis"):
-                col1, col2, col3= st.columns(3)
-                poro = col1.number_input(label="Porosity", step=0.10, value=0.15) # Porosity
-                rw =col1.number_input(label="Wellbore Radius ft", step=0.10, value=0.333)  # Wellbore radius, ft
-                h = col2.number_input(label="Reservoir thickness ft", step=1, value=32) # Reservoir thickness, ft
+                col1, col2, col3 = st.columns(3)
+                poro = col1.number_input(
+                    label="Porosity", step=0.10, value=0.15
+                )  # Porosity
+                rw = col1.number_input(
+                    label="Wellbore Radius ft", step=0.10, value=0.333
+                )  # Wellbore radius, ft
+                h = col2.number_input(
+                    label="Reservoir thickness ft", step=1, value=32
+                )  # Reservoir thickness, ft
                 # ct = col2.number_input(label="Total Compressibilitym, sip", step=0.10, value=12E-06)  # Total compressibility, sip
-                ct = col2.number_input(label="Total Compressibilitym, sip",step=0.00001, value=0.000012)  # Total compressibility, sip
-                mu_oil = col3.number_input(label="Oil viscosity, cp", step=1, value=2)  # Total compressibility, sip
-                pi = col2.number_input(label="Reservoir Inital Pressure, psi", value=2500) # Initial reservoir pressure, psia
-                Bo =col1.number_input(label="Oil FVF, RB/STB", value=0.133) # Oil FVF, RB/STB
+                ct = col2.number_input(
+                    label="Total Compressibilitym, sip", step=0.00001, value=0.000012
+                )  # Total compressibility, sip
+                mu_oil = col3.number_input(
+                    label="Oil viscosity, cp", step=1, value=2
+                )  # Total compressibility, sip
+                pi = col2.number_input(
+                    label="Reservoir Inital Pressure, psi", value=2500
+                )  # Initial reservoir pressure, psia
+                Bo = col1.number_input(
+                    label="Oil FVF, RB/STB", value=0.133
+                )  # Oil FVF, RB/STB
                 q = col3.number_input(label="well rate", value=1000)
-                your_guess =  col3.number_input(label="guess time index", value=30)
+                your_guess = col3.number_input(label="guess time index", value=30)
                 source_data = st.file_uploader(
                     label="Upload drawdown file", type=["csv", "log", "txt"]
                 )
@@ -413,14 +486,15 @@ def main():
                     # load well-test data
                     try:
                         df = pd.read_csv(source_data, sep=",")
-                        t = df['t'].values
-                        p = df['p'].values
+                        t = df["t"].values
+                        p = df["p"].values
                         # I modified the function below to return the st.pyplot(fig) and draw a graph
-                        constant_rate_drawdown_test(t, p, q, Bo, mu_oil, h, poro, ct, rw, pi, your_guess)
+                        constant_rate_drawdown_test(
+                            t, p, q, Bo, mu_oil, h, poro, ct, rw, pi, your_guess
+                        )
                     except Exception:
                         st.subheader("No data selected")
                         st.write("Select the correct data for the MPFM")
-
 
     # ============================================================
     # ====================Nodal analysis==============
@@ -433,43 +507,85 @@ def main():
         """
         )
 
-        ####################### IPR curve tab ################################
+        # ======================= IPR curve tab ================================
         with st.expander(label="Reservoir Inflow Behaviour - IPR Flow rates"):
             with st.form(key="file_form_nodalIPR"):
                 col1, col2, col3 = st.columns(3)
-                pr =col1.number_input(label="pr - Reservoir pressure (psia)", value=2900) #psi
-                pb =col1.number_input(label="pb - Bubble point pressure (psia)", value=2500) #psi
-                q_test =col2.number_input(label="q_test - Test oil flow rate (bpd)", value=1000) #bpd
-                pwf_test =col2.number_input(label="pwf_test - Flowing bottom pressure of test (psia)", value=2000) #bpd
+                pr = col1.number_input(
+                    label="pr - Reservoir pressure (psia)", value=2900
+                )  # psi
+                pb = col1.number_input(
+                    label="pb - Bubble point pressure (psia)", value=2500
+                )  # psi
+                q_test = col2.number_input(
+                    label="q_test - Test oil flow rate (bpd)", value=1000
+                )  # bpd
+                pwf_test = col2.number_input(
+                    label="pwf_test - Flowing bottom pressure of test (psia)",
+                    value=2000,
+                )  # bpd
                 method = col3.selectbox(
                     "select method",
-                    ["Vogel", "IPR_compuesto", "Darcy"],)
-                pwf_graph =np.array([4000, 3500, 3000, 2500, 1000, 0]) # TDOD make the streamlit
-                pwf =col3.number_input(label="pwf - Flowing bottom pressure (psia)", value=1500) #np.array([4000, 3500, 3000, 2500, 1000, 0])
+                    ["Vogel", "IPR_compuesto", "Darcy"],
+                )
+                pwf_graph = np.array(
+                    [4000, 3500, 3000, 2500, 1000, 0]
+                )  # TDOD make the streamlit
+                pwf = col3.number_input(
+                    label="pwf - Flowing bottom pressure (psia)", value=1500
+                )  # np.array([4000, 3500, 3000, 2500, 1000, 0])
                 st.write("---")
                 submit = st.form_submit_button(label="Submit")
                 if submit:
                     try:
                         col4, col5 = st.columns(2)
-                        fig = IPR_curve_methods(q_test, pwf_test, pr, pwf_graph, pb, method)
+                        fig = IPR_curve_methods(
+                            q_test, pwf_test, pr, pwf_graph, pb, method
+                        )
                         x = aof(q_test, pwf_test, pr, pb)
                         PI = j(q_test, pwf_test, pr, pb)
-                        q1 = qo_t(q_test, pwf_test,pr, pwf,pb)
+                        q1 = qo_t(q_test, pwf_test, pr, pwf, pb)
                         q2 = qo_darcy(q_test, pwf_test, pr, pwf, pb)
                         q3 = qo_ipr_compuesto(q_test, pwf_test, pr, pwf, pb)
                         q4 = qo_vogel(q_test, pwf_test, pr, pwf, pb)
                         q5 = Qb(q_test, pwf_test, pr, pb, pb)
                         # Creating dataframe and putting all the values inside it
-                        col4.write('AOF                          : {:.0f} BBL/d'.format(x))
-                        col4.write('PI                           : {:.1f} bpd/psi'.format(PI))
-                        col4.write('Qo                           : {:.1f} bpd'.format(q1))
-                        col4.write('Qo_darcy                           : {:.1f} bpd'.format(q2))
-                        col5.write('Qo_IPR                           : {:.1f} bpd'.format(q3))
-                        col5.write('Qo_vogel                           : {:.1f} bpd'.format(q4))
-                        col5.write('Qb_flow at bubble                           : {:.1f} bpd'.format(q5))
+                        col4.write(
+                            "AOF                          : {:.0f} BBL/d".format(x)
+                        )
+                        col4.write(
+                            "PI                           : {:.1f} bpd/psi".format(PI)
+                        )
+                        col4.write(
+                            "Qo                           : {:.1f} bpd".format(q1)
+                        )
+                        col4.write(
+                            "Qo_darcy                           : {:.1f} bpd".format(q2)
+                        )
+                        col5.write(
+                            "Qo_IPR                           : {:.1f} bpd".format(q3)
+                        )
+                        col5.write(
+                            "Qo_vogel                           : {:.1f} bpd".format(q4)
+                        )
+                        col5.write(
+                            "Qb_flow at bubble                           : {:.1f} bpd".format(
+                                q5
+                            )
+                        )
                         st.write("---")
-                        st.caption('Solving for rates 0 to 5000 with step of 1000 BBL/d')
-                        columns = ['AOF', 'PI', 'Qo', 'Qo_darcy', 'Qo_IPR', 'Qo_vogel', 'Qb_flow at bubble']
+                        st.caption(
+                            "Solving for rates 0 to 5000 with step of 1000 BBL/d"
+                        )
+                        columns = [
+                            "AOF",
+                            "PI",
+                            "Qo",
+                            "Qo_darcy",
+                            "Qo_IPR",
+                            "Qo_vogel",
+                            "Qb_flow at bubble",
+                        ]
                         df = pd.DataFrame(columns=columns)
                         df[columns[0]] = np.array([0])
                         df[columns[0]] = x
@@ -481,24 +597,32 @@ def main():
                         df[columns[6]] = q5
                         st.dataframe(df)
                         st.write("---")
-                        st.caption('Solving for rates 0 to 5000 with step of 1000 BBL/d')
+                        st.caption(
+                            "Solving for rates 0 to 5000 with step of 1000 BBL/d"
+                        )
                         st.pyplot(fig)
                     except Exception:
                         st.subheader("No data selected")
                         st.write("Select the correct data for the MPFM")
 
-        ####################### IPR with fluid propertry tab ################################
-        with st.expander(label="Reservoir Inflow Behaviour - IPR Petrophysical and Fluid Properties"):
+        # ====================== IPR with fluid propertry tab ================================
+        with st.expander(
+            label="Reservoir Inflow Behaviour - IPR Petrophysical and Fluid Properties"
+        ):
             with st.form(key="file_form_nodal"):
                 col1, col2, col3 = st.columns(3)
-                pr =col1.number_input(label="pr - Reservoir pressure (psia)", value=4000) #psi
-                ko  =col1.number_input(label="Effective premeablity md", value=10)
-                h  =col1.number_input(label="h Reservoir hieght ft", value=50)
-                bo =col2.number_input(label="bo Formation volume factor rb/stb", value=1.2)
-                uo =col2.number_input(label="uo Oil viscosity cp", value=1.2)
-                re =col3.number_input(label="re Drainage radius ft", value=3000)
-                rw =col3.number_input(label="rw Well radius ft", value=0.328)
-                s  =col3.number_input(label="s Skin", value=0)
+                pr = col1.number_input(
+                    label="pr - Reservoir pressure (psia)", value=4000
+                )  # psi
+                ko = col1.number_input(label="Effective premeablity md", value=10)
+                h = col1.number_input(label="h Reservoir hieght ft", value=50)
+                bo = col2.number_input(
+                    label="bo Formation volume factor rb/stb", value=1.2
+                )
+                uo = col2.number_input(label="uo Oil viscosity cp", value=1.2)
+                re = col3.number_input(label="re Drainage radius ft", value=3000)
+                rw = col3.number_input(label="rw Well radius ft", value=0.328)
+                s = col3.number_input(label="s Skin", value=0)
                 st.write("---")
                 submit = st.form_submit_button(label="Submit")
                 if submit:
@@ -506,7 +630,7 @@ def main():
                         q1 = j_darcy(ko, h, bo, uo, re, rw, s)
                         AOF = q1 * pr
                         st.subheader("Results for AOF and PI")
-                        columns = ['AOF', 'PI']
+                        columns = ["AOF", "PI"]
                         df = pd.DataFrame(columns=columns)
                         df[columns[0]] = np.array([0])
                         df[columns[0]] = AOF
@@ -516,20 +640,21 @@ def main():
                         st.subheader("No data selected")
                         st.write("Select the correct data for the MPFM")
 
-
         ####################### VLR tab ################################
         with st.expander(label="VLR"):
             with st.form(key="file_form_nodalp"):
                 col1, col2, col3 = st.columns(3)
-                THP = col1.number_input(label="THP - Pressure psi" , value=250 )#psia
-                wc = col1.number_input(label="wc - water cut %" , value=0.75)
-                sg_h2o = col1.number_input(label="SG" , value=1.04)
-                API = col2.number_input(label="API" , value=30)
-                Q = col2.number_input(label="Q - Flow rate bpd" , value=2500 )#bpd
-                ID = col2.number_input(label="ID inch" , value=2.875 )#in
-                tvd = col3.number_input(label="tvd - True vertical depth" , value=6000 )#ft
-                md = col3.number_input(label="md - Measured depth" , value=6600 )#ft
-                C = col3.number_input(label="C - Factor" , value=120)
+                THP = col1.number_input(label="THP - Pressure psi", value=250)  # psia
+                wc = col1.number_input(label="wc - water cut %", value=0.75)
+                sg_h2o = col1.number_input(label="SG", value=1.04)
+                API = col2.number_input(label="API", value=30)
+                Q = col2.number_input(label="Q - Flow rate bpd", value=2500)  # bpd
+                ID = col2.number_input(label="ID inch", value=2.875)  # in
+                tvd = col3.number_input(
+                    label="tvd - True vertical depth", value=6000
+                )  # ft
+                md = col3.number_input(label="md - Measured depth", value=6600)  # ft
+                C = col3.number_input(label="C - Factor", value=120)
                 st.write("---")
                 submit = st.form_submit_button(label="Submit")
                 if submit:
@@ -543,7 +668,15 @@ def main():
                         fig = vlp_curve(THP, API, wc, sg_h2o, md, tvd, ID, C)
                         # fig, fig2 = vlp_curve(THP, API, wc, sg_h2o, md, tvd, ID, C)
                         # Creating dataframe and putting all the values inside it
-                        columns = ['THP', 'SG avg', 'Gradient avg', 'Pressure due gravity', 'f friction', 'Pf Pressure due friction', 'Po Total Head']
+                        columns = [
+                            "THP",
+                            "SG avg",
+                            "Gradient avg",
+                            "Pressure due gravity",
+                            "f friction",
+                            "Pf Pressure due friction",
+                            "Po Total Head",
+                        ]
                         df = pd.DataFrame(columns=columns)
                         df[columns[0]] = np.array([0])
                         df[columns[0]] = THP
@@ -559,27 +692,41 @@ def main():
                         st.subheader("No data selected")
                         st.write("Select the correct data for the IPR")
 
-        ####################### IPR vs VLP curve tab ################################
+        # ====================== IPR vs VLP curve tab ================================
         with st.expander(label="IPR vs VLP"):
             with st.form(key="file_form_nodalvlp"):
                 col1, col2 = st.columns(2)
-                col1.subheader('IPR Data')
-                pr =col1.number_input(label="pr - Reservoir pressure (psia)", value=4000) #psi
-                pb =col1.number_input(label="pb - Bubble point pressure (psia)", value=3000) #psi
-                pwf =col1.number_input(label="pwf - Flowing bottom pressure (psia)", value=4000) #np.array([4000, 3500, 3000, 2500, 1000, 0])
-                q_test =col1.number_input(label="q_test - Test oil flow rate (bpd)", value=1500) #bpd
-                pwf_test =col1.number_input(label="pwf_test - Flowing bottom pressure of test (psia)", value=2000) #bpd C = col1.number_input(label="C - Factor" , value=120)
+                col1.subheader("IPR Data")
+                pr = col1.number_input(
+                    label="pr - Reservoir pressure (psia)", value=4000
+                )  # psi
+                pb = col1.number_input(
+                    label="pb - Bubble point pressure (psia)", value=3000
+                )  # psi
+                pwf = col1.number_input(
+                    label="pwf - Flowing bottom pressure (psia)", value=4000
+                )  # np.array([4000, 3500, 3000, 2500, 1000, 0])
+                q_test = col1.number_input(
+                    label="q_test - Test oil flow rate (bpd)", value=1500
+                )  # bpd
+                pwf_test = col1.number_input(
+                    label="pwf_test - Flowing bottom pressure of test (psia)",
+                    value=2000,
+                )  # bpd C = col1.number_input(label="C - Factor" , value=120)
                 method = col1.selectbox(
                     "select method",
-                    ["Vogel", "Darcy"],)
-                col2.subheader('IPR Data')
-                THP = col2.number_input(label="THP - Pressure psi" , value=250 )#psia
-                sg_h2o = col2.number_input(label="SG" , value=1.04)
-                wc = col2.number_input(label="wc - water cut %" , value=0.75)
-                API = col2.number_input(label="API" , value=30)
-                ID = col2.number_input(label="ID inch" , value=2.875 )#in
-                md = col2.number_input(label="md - Measured depth" , value=6600 )#ft
-                tvd = col2.number_input(label="tvd - True vertical depth" , value=6000 )#ft
+                    ["Vogel", "Darcy"],
+                )
+                col2.subheader("IPR Data")
+                THP = col2.number_input(label="THP - Pressure psi", value=250)  # psia
+                sg_h2o = col2.number_input(label="SG", value=1.04)
+                wc = col2.number_input(label="wc - water cut %", value=0.75)
+                API = col2.number_input(label="API", value=30)
+                ID = col2.number_input(label="ID inch", value=2.875)  # in
+                md = col2.number_input(label="md - Measured depth", value=6600)  # ft
+                tvd = col2.number_input(
+                    label="tvd - True vertical depth", value=6000
+                )  # ft
                 st.write("---")
                 submit = st.form_submit_button(label="Submit")
                 if submit:
@@ -592,9 +739,33 @@ def main():
                         x = aof(q_test, pwf_test, pr, pb)
                         PI = j(q_test, pwf_test, pr, pb)
                         po = THP + Pf + Pg
-                        fig = IPR_vlp_curve(THP,API, wc, sg_h2o, md, tvd, ID, C, q_test, pwf_test,  pr, pb, method)
+                        fig = IPR_vlp_curve(
+                            THP,
+                            API,
+                            wc,
+                            sg_h2o,
+                            md,
+                            tvd,
+                            ID,
+                            C,
+                            q_test,
+                            pwf_test,
+                            pr,
+                            pb,
+                            method,
+                        )
                         # Creating dataframe and putting all the values inside it
-                        columns = ['THP', 'SG avg', 'Gradient avg', 'Pressure due gravity', 'f friction', 'Pf Pressure due friction', 'Po Total Head', 'AOF','PI']
+                        columns = [
+                            "THP",
+                            "SG avg",
+                            "Gradient avg",
+                            "Pressure due gravity",
+                            "f friction",
+                            "Pf Pressure due friction",
+                            "Po Total Head",
+                            "AOF",
+                            "PI",
+                        ]
                         df = pd.DataFrame()
                         df[columns[0]] = np.array([0])
                         df[columns[0]] = THP
@@ -625,93 +796,129 @@ def main():
             Please visit his page and star his work
         """
         )
-        ####################### Separaotr beta chart ################################
+        # ====================== Separaotr beta chart ================================
         with st.expander(label="Separator Beta value"):
             image1 = Image.open(os.path.join(package_dir, "Thumbnail/beta.jpg"))
             st.image(image1, caption="Beta for seprator")
         with st.expander(label="Horizontal Three-Phase Separators"):
             with st.form(key="file_form_Hsizing"):
-                image = Image.open(os.path.join(package_dir, "Thumbnail/threephase_separator.png"))
+                image = Image.open(
+                    os.path.join(package_dir, "Thumbnail/threephase_separator.png")
+                )
                 st.image(image, caption="3 phase separator")
-                st.subheader('Input parameters')
+                st.subheader("Input parameters")
                 st.write("---")
                 col1, col2, col3, col4 = st.columns(4)
-                qg =col1.number_input(label="Gas flow rate MMscfd", value=5 ) #MMscfd
-                qo =col1.number_input(label="Oil flow rate bpd", value=5000 ) #bpd
-                qw =col1.number_input(label="water flow rate bpd", value=3000 ) #bpd
-                Api =col1.number_input(label="API", value=30)
-                sg_gas =col2.number_input(label="Gas SG", value=0.6)
-                sg_w =col2.number_input(label="Water SG", value=1.07)
-                P =col2.number_input(label="Pressure psia", value=100 ) #psia
-                T =col2.number_input(label="Temperatur F", value=90 ) #F
-                Z =col3.number_input(label="Compress factor", value=0.99)
-                uo =col3.number_input(label="Oil Viscosity cp", value=10 ) #cp
-                uw= col3.number_input(label="Water viscosity cp", value=1)#cp
-                ug =col3.number_input(label="Gas viscosity cp", value=0.013 ) #cp
-                tro =col4.number_input(label="Retention time water min", value=10 ) #min
-                trw =col4.number_input(label="Retention time oil  min", value=10 ) #min
-                beta =col4.number_input(label="Beta Aw/A choose from graph", value=0.3 ) # from grpah
+                qg = col1.number_input(label="Gas flow rate MMscfd", value=5)  # MMscfd
+                qo = col1.number_input(label="Oil flow rate bpd", value=5000)  # bpd
+                qw = col1.number_input(label="water flow rate bpd", value=3000)  # bpd
+                Api = col1.number_input(label="API", value=30)
+                sg_gas = col2.number_input(label="Gas SG", value=0.6)
+                sg_w = col2.number_input(label="Water SG", value=1.07)
+                P = col2.number_input(label="Pressure psia", value=100)  # psia
+                T = col2.number_input(label="Temperatur F", value=90)  # F
+                Z = col3.number_input(label="Compress factor", value=0.99)
+                uo = col3.number_input(label="Oil Viscosity cp", value=10)  # cp
+                uw = col3.number_input(label="Water viscosity cp", value=1)  # cp
+                ug = col3.number_input(label="Gas viscosity cp", value=0.013)  # cp
+                tro = col4.number_input(
+                    label="Retention time water min", value=10
+                )  # min
+                trw = col4.number_input(
+                    label="Retention time oil  min", value=10
+                )  # min
+                beta = col4.number_input(
+                    label="Beta Aw/A choose from graph", value=0.3
+                )  # from grpah
                 st.write("---")
                 submit = st.form_submit_button(label="Submit")
                 if submit:
                     # load well-test data
                     try:
-                        separator_trif_horizontal(qg, qo, qw, Api, sg_gas, sg_w, P, T, Z, uo , uw, ug, tro, trw, beta)
+                        separator_trif_horizontal(
+                            qg,
+                            qo,
+                            qw,
+                            Api,
+                            sg_gas,
+                            sg_w,
+                            P,
+                            T,
+                            Z,
+                            uo,
+                            uw,
+                            ug,
+                            tro,
+                            trw,
+                            beta,
+                        )
                     except Exception:
                         st.subheader("No data selected")
                         st.write("Select the correct data for the Separator")
 
-        ####################### Vertical 3 Phase Separator ##########################
+        # ====================== Vertical 3 Phase Separator ==========================
         with st.expander(label="Vertical Three-Phase Separators"):
             with st.form(key="file_form_Vsizing"):
-                image = Image.open(os.path.join(package_dir, "Thumbnail/vertical threephase_separator.png"))
+                image = Image.open(
+                    os.path.join(
+                        package_dir, "Thumbnail/vertical threephase_separator.png"
+                    )
+                )
                 st.image(image, caption="Vertical 3 phase separator")
-                st.subheader('Input parameters')
+                st.subheader("Input parameters")
                 st.write("---")
                 # Data
                 col1, col2, col3, col4 = st.columns(4)
-                qg =col1.number_input(label="Gas flow rate MMscfd", value=5 ) #MMscfd
-                qo =col1.number_input(label="Oil flow rate bpd", value=5000 ) #bpd
-                qw =col1.number_input(label="water flow rate bpd", value=3000 ) #bpd
-                Api =col1.number_input(label="API", value=30)
-                sg_gas =col2.number_input(label="Gas SG", value=0.6)
-                sg_w =col2.number_input(label="Water SG", value=1.07)
-                P =col2.number_input(label="Pressure psia", value=100 ) #psia
-                T =col2.number_input(label="Temperatur F", value=90 ) #F
-                Z =col3.number_input(label="Compress factor", value=0.99)
-                uo =col3.number_input(label="Oil Viscosity cp", value=10 ) #cp
-                uw= col3.number_input(label="Water viscosity cp", value=1)#cp
-                ug =col3.number_input(label="Gas viscosity cp", value=0.013 ) #cp
-                tro =col4.number_input(label="Retention time water min", value=10 ) #min
-                trw =col4.number_input(label="Retention time oil  min", value=10 ) #min
+                qg = col1.number_input(label="Gas flow rate MMscfd", value=5)  # MMscfd
+                qo = col1.number_input(label="Oil flow rate bpd", value=5000)  # bpd
+                qw = col1.number_input(label="water flow rate bpd", value=3000)  # bpd
+                Api = col1.number_input(label="API", value=30)
+                sg_gas = col2.number_input(label="Gas SG", value=0.6)
+                sg_w = col2.number_input(label="Water SG", value=1.07)
+                P = col2.number_input(label="Pressure psia", value=100)  # psia
+                T = col2.number_input(label="Temperatur F", value=90)  # F
+                Z = col3.number_input(label="Compress factor", value=0.99)
+                uo = col3.number_input(label="Oil Viscosity cp", value=10)  # cp
+                uw = col3.number_input(label="Water viscosity cp", value=1)  # cp
+                ug = col3.number_input(label="Gas viscosity cp", value=0.013)  # cp
+                tro = col4.number_input(
+                    label="Retention time water min", value=10
+                )  # min
+                trw = col4.number_input(
+                    label="Retention time oil  min", value=10
+                )  # min
                 st.write("---")
                 submit = st.form_submit_button(label="Submit")
                 if submit:
                     # load well-test data
                     try:
-                        separator_trif_vertical(qg, qo, qw, Api, sg_gas, sg_w, P, T, Z, uo , uw, ug, tro, trw)
+                        separator_trif_vertical(
+                            qg, qo, qw, Api, sg_gas, sg_w, P, T, Z, uo, uw, ug, tro, trw
+                        )
                     except Exception:
                         st.subheader("No data selected")
                         st.write("Select the correct data for the Separtor")
 
-        ####################### Horizontal 2 Phase Separator ##########################
+        # ====================== Horizontal 2 Phase Separator ==========================
         with st.expander(label="Horizontal Two-Phase Separators"):
             with st.form(key="file_form_H2sizing"):
-                image = Image.open(os.path.join(package_dir, "Thumbnail/two_phase_separator.png"))
+                image = Image.open(
+                    os.path.join(package_dir, "Thumbnail/two_phase_separator.png")
+                )
                 st.image(image, caption="Horizontal 2 phase separator")
-                st.subheader('Input parameters')
+                st.subheader("Input parameters")
                 st.write("---")
                 # Data
                 col1, col2, col3 = st.columns(3)
-                qg =col1.number_input(label="Gas flow rate MMscfd", value=10 ) #MMscfd
-                ql =col1.number_input(label="Oil flow rate bpd", value=2000 ) #bpd
-                Api =col1.number_input(label="API", value=40)
-                sg_gas =col2.number_input(label="Gas SG", value=0.6)
-                P =col2.number_input(label="Pressure psia", value=1000 ) #psia
-                T =col2.number_input(label="Temperatur F", value=60 ) #F
-                z =col3.number_input(label="Compress factor", value=0.84)
-                ug =col3.number_input(label="Gas viscosity cp", value=0.013 ) #cp
-                tr =col3.number_input(label="Retention time water min", value=3 ) #min
+                qg = col1.number_input(label="Gas flow rate MMscfd", value=10)  # MMscfd
+                ql = col1.number_input(label="Oil flow rate bpd", value=2000)  # bpd
+                Api = col1.number_input(label="API", value=40)
+                sg_gas = col2.number_input(label="Gas SG", value=0.6)
+                P = col2.number_input(label="Pressure psia", value=1000)  # psia
+                T = col2.number_input(label="Temperatur F", value=60)  # F
+                z = col3.number_input(label="Compress factor", value=0.84)
+                ug = col3.number_input(label="Gas viscosity cp", value=0.013)  # cp
+                tr = col3.number_input(label="Retention time water min", value=3)  # min
                 st.write("---")
                 submit = st.form_submit_button(label="Submit")
                 if submit:
@@ -721,33 +928,34 @@ def main():
                         st.subheader("No data selected")
                         st.write("Select the correct data for the Separtor")
 
-        ####################### Vertical 2 Phase Separator ##########################
+        # ====================== Vertical 2 Phase Separator ==========================
         with st.expander(label="Verical Two-Phase Separators"):
             with st.form(key="file_form_V2sizing"):
-                image = Image.open(os.path.join(package_dir, "Thumbnail/vertical two phase.png"))
+                image = Image.open(
+                    os.path.join(package_dir, "Thumbnail/vertical two phase.png")
+                )
                 st.image(image, caption="Vertical 2 phase separator")
-                st.subheader('Input parameters')
+                st.subheader("Input parameters")
                 st.write("---")
                 # Data
                 col1, col2, col3 = st.columns(3)
-                qg =col1.number_input(label="Gas flow rate MMscfd", value=10 ) #MMscfd
-                qo =col1.number_input(label="Oil flow rate bpd", value=2000 ) #bpd
-                Api =col1.number_input(label="API", value=40)
-                sg_gas =col2.number_input(label="Gas SG", value=0.6)
-                P =col2.number_input(label="Pressure psia", value=1000 ) #psia
-                T =col2.number_input(label="Temperatur F", value=60 ) #F
-                z =col3.number_input(label="Compress factor", value=0.84)
-                ug =col3.number_input(label="Gas viscosity cp", value=0.013 ) #cp
+                qg = col1.number_input(label="Gas flow rate MMscfd", value=10)  # MMscfd
+                qo = col1.number_input(label="Oil flow rate bpd", value=2000)  # bpd
+                Api = col1.number_input(label="API", value=40)
+                sg_gas = col2.number_input(label="Gas SG", value=0.6)
+                P = col2.number_input(label="Pressure psia", value=1000)  # psia
+                T = col2.number_input(label="Temperatur F", value=60)  # F
+                z = col3.number_input(label="Compress factor", value=0.84)
+                ug = col3.number_input(label="Gas viscosity cp", value=0.013)  # cp
                 st.write("---")
                 submit = st.form_submit_button(label="Submit")
                 if submit:
                     # load well-test data
                     try:
-                        separator_bif_vertical(qg, qo, Api, sg_gas, P, T, z, ug )
+                        separator_bif_vertical(qg, qo, Api, sg_gas, P, T, z, ug)
                     except Exception:
                         st.subheader("No data selected")
                         st.write("Select the correct data for the Separtor")
-
 
 
 if __name__ == "__main__":

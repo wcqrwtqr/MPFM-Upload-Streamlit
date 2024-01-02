@@ -8,8 +8,8 @@ from graphing import graphing_line_arg
 
 
 @st.experimental_memo
-def load_df_spartek(source_file, row:int):
-    ''' This helper funciton to cache the dataframe to memoery so there is no
+def load_df_spartek(source_file, row: int):
+    '''This helper funciton to cache the dataframe to memoery so there is no
     extensive computation evey time we change the values
 
     :param source_file: file path
@@ -95,10 +95,11 @@ def Gauges_data_Spartek(source_file, row=20):
 # *************** Gauges Function for Metrolg Gauges******************
 # ********************************************************************
 
+
 # @st.cache
 @st.experimental_memo
-def load_df_metorlog(source_file, row:int):
-    ''' This helper funciton to cache the dataframe to memoery so there is no
+def load_df_metorlog(source_file, row: int):
+    '''This helper funciton to cache the dataframe to memoery so there is no
     extensive computation evey time we change the values
 
     :param source_file: file path
@@ -164,6 +165,7 @@ def Gauges_data(source_file, row=20):
 # ************** MPFM Function ***************************************
 # ********************************************************************
 
+
 def MPFM_data(source_file):
     """MPFM data processing generator
 
@@ -212,8 +214,16 @@ def MPFM_data(source_file):
     API = 141.5 / (avg_oilSG / 1000) - 131.5
     # start           = df_lst['Clock'][range_data_selection[0]] + ' ' + df_lst['Date'][range_data_selection[0]]
     # end             = df_lst['Clock'][range_data_selection[1]-1] + ' ' + df_lst['Date'][range_data_selection[1]-1]
-    start = (df_lst["date_time"][range_data_selection[0]] + " " + df_lst["Date"][range_data_selection[0]])
-    end = (df_lst["date_time"][range_data_selection[1] - 1] + " " + df_lst["Date"][range_data_selection[1] - 1])
+    start = (
+        df_lst["date_time"][range_data_selection[0]]
+        + " "
+        + df_lst["Date"][range_data_selection[0]]
+    )
+    end = (
+        df_lst["date_time"][range_data_selection[1] - 1]
+        + " "
+        + df_lst["Date"][range_data_selection[1] - 1]
+    )
     # Making the dataframe
     dict_summary = {
         "Start Time": start,

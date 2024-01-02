@@ -55,3 +55,6 @@ http://localhost:8501
 ** TODO Update the version of the dependencies
 ** TODO Update the UI with new elemens ts of the streamlit library
 ** TODO Add other tabs for conversion rates and other
+** TODO refactor the application code 
+** TODO do some clean up on the comments
+** TODO remove the unneeded files 

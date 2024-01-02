@@ -1,8 +1,9 @@
 import streamlit as st
 
-'''
+"""
 This module help calculate the air/oil ratio for the burning process
-'''
+"""
+
 
 def convert_api_and_oil_rate_to_ton(api, oil):
     "This function will convert the data"

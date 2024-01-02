@@ -17,13 +17,11 @@ class Loadingtruck(object):
         self.loadingstation = simpy.Resource(env, num_loading_station)
         self.loadingtime = loadingtime
 
-    # def filltruck(self, truck): ########
+    # def filltruck(self, truck):
     def filltruck(self, truck, loadingtime):
         """The loading processes. It takes a ``Truck`` processes and starts
         to fill it oil."""
-        yield self.env.timeout(
-            random.randint(loadingtime - 10, loadingtime + 10)
-        )  #####
+        yield self.env.timeout(random.randint(loadingtime - 10, loadingtime + 10))
 
     def drivetrucktostation(self, truck):
         """The moving process to enter the truck to loading processes. It takes a ``truck`` processes and tries."""
@@ -41,7 +39,7 @@ def truck(env, name, cw, loadingtime):
         yield request
 
         st.write(
-            f"🚚....{name} drives to loading station at {round(env.now/60,0)} hours."
+            f"🚚....{name} drives to loading station at {round(env.now/60, 0)} hours."
         )
         yield env.process(cw.drivetrucktostation(name))
 
