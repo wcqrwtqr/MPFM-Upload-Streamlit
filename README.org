@@ -52,9 +52,9 @@ After the docker builds the image it will run the docker container and now you c
 http://localhost:8501
 
 * Next actions
-** TODO Update the version of the dependencies
-** TODO Update the UI with new elemens ts of the streamlit library
-** TODO Add other tabs for conversion rates and other
-** TODO refactor the application code 
-** TODO do some clean up on the comments
-** TODO remove the unneeded files 
+- [ ] Update the version of the dependencies
+- [ ] Update the UI with new elements ts of the streamlit library
+- [ ] Add other tabs for conversion rates and other
+- [ ] refactor the application code
+- [ ] do some clean up on the comments
+- [ ] remove the unneeded files
